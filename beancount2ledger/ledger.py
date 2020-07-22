@@ -129,19 +129,6 @@ def split_currency_conversions(entry):
     return converted, new_entries
 
 
-class LedgerReport(base.Report):
-    """Print out the entries in a format that can be parsed by Ledger."""
-
-    names = ['ledger']
-    default_format = 'ledger'
-
-    def render_ledger(self, entries, errors, options_map, file):
-        ledger_printer = LedgerPrinter()
-        for entry in entries:
-            file.write(ledger_printer(entry))
-            file.write('\n')
-
-
 class LedgerPrinter:
     "Multi-method for printing directives in Ledger format."
 
@@ -272,19 +259,6 @@ class LedgerPrinter:
         pass  # Don't render anything.
 
 
-class HLedgerReport(base.Report):
-    """Print out the entries in a format that can be parsed by HLedger."""
-
-    names = ['hledger']
-    default_format = 'hledger'
-
-    def render_hledger(self, entries, errors, options_map, file):
-        hledger_printer = HLedgerPrinter()
-        for entry in entries:
-            file.write(hledger_printer(entry))
-            file.write('\n')
-
-
 class HLedgerPrinter(LedgerPrinter):
     "Multi-method for printing directives in HLedger format."
 
@@ -343,9 +317,3 @@ class HLedgerPrinter(LedgerPrinter):
     def Open(_, entry, oss):
         # Not supported by HLedger AFAIK.
         oss.write(';; Open: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
-
-
-__reports__ = [
-    LedgerReport,
-    HLedgerReport,
-    ]
