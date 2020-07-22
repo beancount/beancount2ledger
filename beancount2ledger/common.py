@@ -54,12 +54,12 @@ def postings_by_type(entry):
     postings_simple = []
     for posting in entry.postings:
         if posting.cost:
-            accumlator = postings_at_cost
+            accumulator = postings_at_cost
         elif posting.price:
-            accumlator = postings_at_price
+            accumulator = postings_at_price
         else:
-            accumlator = postings_simple
-        accumlator.append(posting)
+            accumulator = postings_simple
+        accumulator.append(posting)
 
     return (postings_simple, postings_at_price, postings_at_cost)
 
