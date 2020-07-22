@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
+# SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
 
 # SPDX-License-Identifier: GPL-2.0-only
 
@@ -13,11 +14,12 @@ import unittest
 
 from beancount.core import data
 from beancount.utils import test_utils
-from beancount.reports import report
 from beancount.scripts import example
 from beancount.parser import cmptest
-from beancount.reports import convert_reports
 from beancount import loader
+
+import beancount2ledger
+from beancount2ledger.ledger import quote_currency, postings_by_type, split_currency_conversions
 
 
 class TestLedgerUtilityFunctions(cmptest.TestCase):
@@ -33,7 +35,7 @@ class TestLedgerUtilityFunctions(cmptest.TestCase):
             Assets:CA:Investment:HOOL          5 "HOOL1" {500.00 USD}
             Expenses:Commissions            9.95 USD
         """
-        self.assertEqual(expected, convert_reports.quote_currency(test))
+        self.assertEqual(expected, quote_currency(test))
 
 
 class TestLedgerUtilityFunctionsOnPostings(cmptest.TestCase):
@@ -63,23 +65,23 @@ class TestLedgerUtilityFunctionsOnPostings(cmptest.TestCase):
         self.txns = [entry for entry in entries if isinstance(entry, data.Transaction)]
 
     def test_postings_by_type(self):
-        postings_lists = convert_reports.postings_by_type(self.txns[0])
+        postings_lists = postings_by_type(self.txns[0])
         self.assertEqual([2, 0, 1], list(map(len, postings_lists)))
 
-        postings_lists = convert_reports.postings_by_type(self.txns[1])
+        postings_lists = postings_by_type(self.txns[1])
         self.assertEqual([2, 1, 0], list(map(len, postings_lists)))
 
-        postings_lists = convert_reports.postings_by_type(self.txns[2])
+        postings_lists = postings_by_type(self.txns[2])
         self.assertEqual([1, 1, 1], list(map(len, postings_lists)))
 
     def test_split_currency_conversions(self):
-        converted, _ = convert_reports.split_currency_conversions(self.txns[0])
+        converted, _ = split_currency_conversions(self.txns[0])
         self.assertFalse(converted)
 
-        converted, _ = convert_reports.split_currency_conversions(self.txns[1])
+        converted, _ = split_currency_conversions(self.txns[1])
         self.assertFalse(converted)
 
-        converted, new_entries = convert_reports.split_currency_conversions(self.txns[2])
+        converted, new_entries = split_currency_conversions(self.txns[2])
         self.assertTrue(converted)
         self.assertEqualEntries("""
 
@@ -136,8 +138,8 @@ class TestLedgerConversion(test_utils.TestCase):
         stdout, stderr = pipe.communicate()
         self.assertEqual(0, pipe.returncode, stderr)
 
-    @test_utils.docfile
-    def test_simple(self, filename):
+    @loader.load_doc()
+    def test_simple(self, entries, _, __):
         """
           ;; All supported features exhibited here.
 
@@ -152,9 +154,7 @@ class TestLedgerConversion(test_utils.TestCase):
 
           2015-01-01 custom "budget" Expenses:Food  "yearly"  34.43 HRK
         """
-        with test_utils.capture() as stdout:
-            result = test_utils.run_with_args(report.main, [filename, 'ledger'])
-        self.assertEqual(0, result)
+        result = beancount2ledger.convert(entries)
         self.assertLines("""
 
           account Expenses:Restaurant
@@ -168,10 +168,10 @@ class TestLedgerConversion(test_utils.TestCase):
             Expenses:Restaurant                                                     50.02 USD
             Assets:Cash                                                            -50.02 USD
 
-        """, stdout.getvalue())
+        """, result)
 
-    @test_utils.docfile
-    def test_cost_and_foreign_currency(self, filename):
+    @loader.load_doc()
+    def test_cost_and_foreign_currency(self, entries, _, __):
         """
           plugin "beancount.plugins.implicit_prices"
 
@@ -184,9 +184,7 @@ class TestLedgerConversion(test_utils.TestCase):
             Expenses:Commissions            9.95 USD
             Assets:CA:Investment:Cash   -2939.46 CAD @ 0.8879 USD
         """
-        with test_utils.capture() as stdout:
-            result = test_utils.run_with_args(report.main, [filename, 'ledger'])
-        self.assertEqual(0, result)
+        result = beancount2ledger.convert(entries)
         self.assertLines("""
 
           account Assets:CA:Investment:HOOL
@@ -205,10 +203,10 @@ class TestLedgerConversion(test_utils.TestCase):
 
           P 2014-11-02 00:00:00 CAD    0.8879 USD
 
-        """, stdout.getvalue())
+        """, result)
 
-    @test_utils.docfile
-    def test_tags_links(self, filename):
+    @loader.load_doc()
+    def test_tags_links(self, entries, _, ___):
         """
           2019-01-25 open Assets:A
           2019-01-25 open Assets:B
@@ -217,9 +215,7 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:A                       10.00 EUR
             Assets:B                      -10.00 EUR
         """
-        with test_utils.capture() as stdout:
-            result = test_utils.run_with_args(report.main, [filename, 'ledger'])
-        self.assertEqual(0, result)
+        result = beancount2ledger.convert(entries)
         self.assertLines("""
           account Assets:A
 
@@ -230,7 +226,7 @@ class TestLedgerConversion(test_utils.TestCase):
             ; Link: link1, link2
             Assets:A                       10.00 EUR
             Assets:B                      -10.00 EUR
-        """, stdout.getvalue())
+        """, result)
 
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
@@ -246,10 +242,9 @@ class TestLedgerConversion(test_utils.TestCase):
 
             # Convert the file to Ledger format.
             with tempfile.NamedTemporaryFile('w', suffix='.ledger') as lgrfile:
-                with test_utils.capture():
-                    result = test_utils.run_with_args(
-                        report.main, [beanfile.name, '-o', lgrfile.name, 'ledger'])
-                self.assertEqual(0, result)
+                result = beancount2ledger.convert_file(beanfile.name)
+                lgrfile.write(result)
+                lgrfile.flush()
 
                 # FIXME: Use a proper temp dir.
                 shutil.copyfile(lgrfile.name, '/tmp/test.ledger')
@@ -258,8 +253,8 @@ class TestLedgerConversion(test_utils.TestCase):
 
 class TestHLedgerConversion(test_utils.TestCase):
 
-    @test_utils.docfile
-    def test_tags_links(self, filename):
+    @loader.load_doc()
+    def test_tags_links(self, entries, _, __):
         """
           2019-01-25 open Assets:A
           2019-01-25 open Assets:B
@@ -268,9 +263,7 @@ class TestHLedgerConversion(test_utils.TestCase):
             Assets:A                       10.00 EUR
             Assets:B                      -10.00 EUR
         """
-        with test_utils.capture() as stdout:
-            result = test_utils.run_with_args(report.main, [filename, 'hledger'])
-        self.assertEqual(0, result)
+        result = beancount2ledger.convert(entries, "hledger")
         self.assertLines("""
           ;; Open: 2019-01-25 close Assets:A
 
@@ -281,7 +274,7 @@ class TestHLedgerConversion(test_utils.TestCase):
             ; Link: link1 link2
             Assets:A                       10.00 EUR
             Assets:B                      -10.00 EUR
-        """, stdout.getvalue())
+        """, result)
 
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
@@ -300,10 +293,9 @@ class TestHLedgerConversion(test_utils.TestCase):
             # Note: don't bother parsing for now, just a smoke test to make sure
             # we don't fail on run.
             with tempfile.NamedTemporaryFile('w', suffix='.hledger') as lgrfile:
-                with test_utils.capture():
-                    result = test_utils.run_with_args(
-                        report.main, [beanfile.name, '-o', lgrfile.name, 'hledger'])
-                self.assertEqual(0, result)
+                result = beancount2ledger.convert_file(beanfile.name, "hledger")
+                lgrfile.write(result)
+                lgrfile.flush()
 
 
 if __name__ == '__main__':

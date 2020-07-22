@@ -20,7 +20,6 @@ from beancount.core import convert
 from beancount.core import amount
 from beancount.core import interpolate
 from beancount.core import display_context
-from beancount.reports import base
 
 
 ROUNDING_ACCOUNT = 'Equity:Rounding'
