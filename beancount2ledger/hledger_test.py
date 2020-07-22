@@ -1,3 +1,7 @@
+"""
+Tests for hledger conversion
+"""
+
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
 # SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
 
@@ -17,6 +21,9 @@ import beancount2ledger
 
 
 class TestHLedgerConversion(test_utils.TestCase):
+    """
+    Tests for hledger conversion
+    """
 
     @loader.load_doc()
     def test_tags_links(self, entries, _, __):
@@ -42,6 +49,9 @@ class TestHLedgerConversion(test_utils.TestCase):
         """, result)
 
     def test_example(self):
+        """
+        Test converted example with hledger
+        """
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',
                                          encoding='utf-8') as beanfile:

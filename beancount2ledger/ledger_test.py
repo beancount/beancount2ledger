@@ -1,3 +1,7 @@
+"""
+Tests for hledger conversion
+"""
+
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
 # SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
 

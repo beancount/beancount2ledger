@@ -26,17 +26,22 @@ class LedgerPrinter:
     # pylint: disable=invalid-name
 
     def __init__(self, dcontext=None):
+        self.io = None
         self.dcontext = dcontext or display_context.DEFAULT_DISPLAY_CONTEXT
-        self.dformat = self.dcontext.build(precision=display_context.Precision.MOST_COMMON)
-        self.dformat_max = self.dcontext.build(precision=display_context.Precision.MAXIMUM)
+        self.dformat = self.dcontext.build(
+            precision=display_context.Precision.MOST_COMMON)
+        self.dformat_max = self.dcontext.build(
+            precision=display_context.Precision.MAXIMUM)
 
     def __call__(self, obj):
-        oss = io.StringIO()
+        self.io = io.StringIO()
         method = getattr(self, obj.__class__.__name__)
-        method(obj, oss)
-        return oss.getvalue()
+        method(obj)
+        return self.io.getvalue()
 
-    def Transaction(self, entry, oss):
+    def Transaction(self, entry):
+        """Transactions"""
+
         strings = []
 
         # Insert a posting to absorb the residual if necessary. This is
@@ -52,35 +57,36 @@ class LedgerPrinter:
         if entry.narration:
             strings.append(entry.narration)
 
-        oss.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(' '.join(strings),
-                                                         flag=entry.flag or '',
-                                                         e=entry))
+        self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
+            ' '.join(strings), flag=entry.flag or '', e=entry))
 
         if entry.tags:
-            oss.write('  ; :{}:\n'.format(':'.join(sorted(entry.tags))))
+            self.io.write('  ; :{}:\n'.format(':'.join(sorted(entry.tags))))
         if entry.links:
-            oss.write('  ; Link: {}\n'.format(', '.join(sorted(entry.links))))
+            self.io.write('  ; Link: {}\n'.format(', '.join(
+                sorted(entry.links))))
 
         for posting in entry.postings:
-            self.Posting(posting, entry, oss)
+            self.Posting(posting, entry)
 
-    def Posting(self, posting, entry, oss):
+    def Posting(self, posting, entry):
+        """Postings"""
+
         flag = '{} '.format(posting.flag) if posting.flag else ''
         assert posting.account is not None
 
         flag_posting = '{:}{:62}'.format(flag, posting.account)
 
         pos_str = (position.to_string(posting, self.dformat, detail=False)
-                   if isinstance(posting.units, Amount)
-                   else '')
+                   if isinstance(posting.units, Amount) else '')
 
         if posting.price is not None:
-            price_str = '@ {}'.format(posting.price.to_string(self.dformat_max))
+            price_str = '@ {}'.format(
+                posting.price.to_string(self.dformat_max))
         else:
             # Figure out if we need to insert a price on a posting held at cost.
             # See https://groups.google.com/d/msg/ledger-cli/35hA0Dvhom0/WX8gY_5kHy0J
-            (postings_simple,
-             postings_at_price,
+            (postings_simple, postings_at_price,
              postings_at_cost) = postings_by_type(entry)
 
             cost = posting.cost
@@ -94,57 +100,85 @@ class LedgerPrinter:
         posting_str = '  {:64} {} {}'.format(flag_posting,
                                              quote_currency(pos_str),
                                              quote_currency(price_str))
-        oss.write(posting_str.rstrip())
+        self.io.write(posting_str.rstrip())
 
-        oss.write('\n')
+        self.io.write('\n')
 
-    def Balance(_, entry, oss):
+    def Balance(self, entry):
+        """Balance entries"""
+
         # We cannot output balance directive equivalents because Ledger only
         # supports file assertions and not dated assertions. See "Balance
         # Assertions for Beancount" for details:
         # https://docs.google.com/document/d/1vyemZFox47IZjuBrT2RjhSHZyTgloYOUeJb73RxMRD0/
-        pass
 
-    def Note(_, entry, oss):
-        oss.write(';; Note: {e.date:%Y-%m-%d} {e.account} {e.comment}\n'.format(e=entry))
+    def Note(self, entry):
+        """Note entries"""
 
-    def Document(_, entry, oss):
-        oss.write(';; Document: {e.date:%Y-%m-%d} {e.account} {e.filename}\n'.format(
-            e=entry))
+        self.io.write(
+            ';; Note: {e.date:%Y-%m-%d} {e.account} {e.comment}\n'.format(
+                e=entry))
 
-    def Pad(_, entry, oss):
+    def Document(self, entry):
+        """Document entries"""
+
+        self.io.write(
+            ';; Document: {e.date:%Y-%m-%d} {e.account} {e.filename}\n'.format(
+                e=entry))
+
+    def Pad(self, entry):
+        """Pad entries"""
+
         # Note: We don't need to output these because when we're loading the
         # Beancount file explicit padding entries will be generated
         # automatically, thus balancing the accounts. Ledger does not support
         # automatically padding, so we can just output this as a comment.
-        oss.write(';; Pad: {e.date:%Y-%m-%d} {e.account} {e.source_account}\n'.format(
-            e=entry))
+        self.io.write(
+            ';; Pad: {e.date:%Y-%m-%d} {e.account} {e.source_account}\n'.
+            format(e=entry))
 
-    def Commodity(_, entry, oss):
+    def Commodity(self, entry):
+        "Commodity declarations" ""
+
         # No need for declaration.
-        oss.write('commodity {e.currency}\n'.format(e=entry))
+        self.io.write('commodity {e.currency}\n'.format(e=entry))
 
-    def Open(_, entry, oss):
-        oss.write('account {e.account:47}\n'.format(e=entry))
+    def Open(self, entry):
+        """Account open statements"""
+
+        self.io.write('account {e.account:47}\n'.format(e=entry))
         if entry.currencies:
-            oss.write('  assert {}\n'.format(' | '.join('commodity == "{}"'.format(currency)
-                                                        for currency in entry.currencies)))
+            self.io.write('  assert {}\n'.format(' | '.join(
+                'commodity == "{}"'.format(currency)
+                for currency in entry.currencies)))
 
-    def Close(_, entry, oss):
-        oss.write(';; Close: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
+    def Close(self, entry):
+        """Account close statements"""
 
-    def Price(_, entry, oss):
-        oss.write(
-            'P {:%Y-%m-%d} 00:00:00 {:<16} {:>16}\n'.format(
+        self.io.write(
+            ';; Close: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
+
+    def Price(self, entry):
+        """Price entries"""
+
+        self.io.write('P {:%Y-%m-%d} 00:00:00 {:<16} {:>16}\n'.format(
             entry.date, quote_currency(entry.currency), str(entry.amount)))
 
-    def Event(_, entry, oss):
-        oss.write(
-            ';; Event: {e.date:%Y-%m-%d} "{e.type}" "{e.description}"\n'.format(e=entry))
+    def Event(self, entry):
+        """ Event entries"""
 
-    def Query(_, entry, oss):
-        oss.write(
-            ';; Query: {e.date:%Y-%m-%d} "{e.name}" "{e.query_string}"\n'.format(e=entry))
+        self.io.write(
+            ';; Event: {e.date:%Y-%m-%d} "{e.type}" "{e.description}"\n'.
+            format(e=entry))
 
-    def Custom(_, entry, oss):
-        pass  # Don't render anything.
+    def Query(self, entry):
+        """Query entries"""
+
+        self.io.write(
+            ';; Query: {e.date:%Y-%m-%d} "{e.name}" "{e.query_string}"\n'.
+            format(e=entry))
+
+    def Custom(self, entry):
+        """Custom entries"""
+
+        # Don't render anything.

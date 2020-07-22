@@ -20,7 +20,7 @@ from .ledger import LedgerPrinter
 class HLedgerPrinter(LedgerPrinter):
     "Multi-method for printing directives in HLedger format."
 
-    def Transaction(self, entry, oss):
+    def Transaction(self, entry):
         strings = []
 
         # Insert a posting to absorb the residual if necessary. This is
@@ -36,42 +36,41 @@ class HLedgerPrinter(LedgerPrinter):
         if entry.narration:
             strings.append(entry.narration)
 
-        oss.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(' '.join(strings),
-                                                         flag=entry.flag or '',
-                                                         e=entry))
+        self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
+            ' '.join(strings), flag=entry.flag or '', e=entry))
 
         if entry.tags:
-            oss.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
+            self.io.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
         if entry.links:
-            oss.write('  ; Link: {}\n'.format(' '.join(sorted(entry.links))))
+            self.io.write('  ; Link: {}\n'.format(' '.join(
+                sorted(entry.links))))
 
         for posting in entry.postings:
-            self.Posting(posting, entry, oss)
+            self.Posting(posting, entry)
 
-    def Posting(self, posting, entry, oss):
+    def Posting(self, posting, entry):
         flag = '{} '.format(posting.flag) if posting.flag else ''
         assert posting.account is not None
 
         flag_posting = '{:}{:62}'.format(flag, posting.account)
 
         pos_str = (position.to_string(posting, self.dformat, detail=False)
-                   if isinstance(posting.units, Amount)
-                   else '')
+                   if isinstance(posting.units, Amount) else '')
         if pos_str:
             # Convert the cost as a price entry, that's what HLedger appears to want.
             pos_str = pos_str.replace('{', '@ ').replace('}', '')
 
         price_str = ('@ {}'.format(posting.price.to_string(self.dformat_max))
-                     if posting.price is not None
-                     else '')
+                     if posting.price is not None else '')
 
         posting_str = '  {:64} {:>16} {:>16}'.format(flag_posting,
                                                      quote_currency(pos_str),
                                                      quote_currency(price_str))
-        oss.write(posting_str.rstrip())
+        self.io.write(posting_str.rstrip())
 
-        oss.write('\n')
+        self.io.write('\n')
 
-    def Open(_, entry, oss):
+    def Open(self, entry):
         # Not supported by HLedger AFAIK.
-        oss.write(';; Open: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
+        self.io.write(
+            ';; Open: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
