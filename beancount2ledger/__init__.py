@@ -10,7 +10,8 @@ __license__ = "GPL-2.0-only"
 
 from beancount import loader
 
-from .ledger import LedgerPrinter, HLedgerPrinter
+from .ledger import LedgerPrinter
+from .hledger import HLedgerPrinter
 
 
 def convert(entries, output_format="ledger"):

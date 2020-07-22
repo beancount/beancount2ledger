@@ -1,7 +1,5 @@
-"""Format converter reports.
-
-This module contains reports that can convert an input file into other formats,
-such as Ledger.
+"""
+Convert Beancount entries to hledger
 """
 
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
@@ -10,126 +8,16 @@ such as Ledger.
 
 __license__ = "GPL-2.0-only"
 
-import re
 import io
 
 from beancount.core.amount import Amount
-from beancount.core import data
 from beancount.core import position
-from beancount.core import convert
 from beancount.core import amount
 from beancount.core import interpolate
 from beancount.core import display_context
 
-
-ROUNDING_ACCOUNT = 'Equity:Rounding'
-
-
-def quote(match):
-    """Add quotes around a re.MatchObject.
-
-    Args:
-      match: A MatchObject from the re module.
-    Returns:
-      A quoted string of the match contents.
-    """
-    currency = match.group(1)
-    return '"{}"'.format(currency) if re.search(r'[0-9\.]', currency) else currency
-
-
-def quote_currency(string):
-    """Quote all the currencies with numbers from the given string.
-
-    Args:
-      string: A string of text.
-    Returns:
-      A string of text, with the commodity expressions surrounded with quotes.
-    """
-    return re.sub(r'\b({})\b'.format(amount.CURRENCY_RE), quote, string)
-
-
-def postings_by_type(entry):
-    """Split up the postings by simple, at-cost, at-price.
-
-    Args:
-      entry: An instance of Transaction.
-    Returns:
-      A tuple of simple postings, postings with price conversions, postings held at cost.
-    """
-    postings_at_cost = []
-    postings_at_price = []
-    postings_simple = []
-    for posting in entry.postings:
-        if posting.cost:
-            accumlator = postings_at_cost
-        elif posting.price:
-            accumlator = postings_at_price
-        else:
-            accumlator = postings_simple
-        accumlator.append(posting)
-
-    return (postings_simple, postings_at_price, postings_at_cost)
-
-
-def split_currency_conversions(entry):
-    """If the transaction has a mix of conversion at cost and a
-    currency conversion, split the transaction into two transactions: one
-    that applies the currency conversion in the same account, and one
-    that uses the other currency without conversion.
-
-    This is required because Ledger does not appear to be able to grok a
-    transaction like this one:
-
-      2014-11-02 * "Buy some stock with foreign currency funds"
-        Assets:CA:Investment:HOOL          5 HOOL {520.0 USD}
-        Expenses:Commissions            9.95 USD
-        Assets:CA:Investment:Cash   -2939.46 CAD @ 0.8879 USD
-
-    HISTORICAL NOTE: Adding a price directive on the first posting above makes
-    Ledger accept the transaction. So we will not split the transaction here
-    now. However, since Ledger's treatment of this type of conflict is subject
-    to revision (See http://bugs.ledger-cli.org/show_bug.cgi?id=630), we will
-    keep this code around, it might become useful eventually. See
-    https://groups.google.com/d/msg/ledger-cli/35hA0Dvhom0/WX8gY_5kHy0J for
-    details of the discussion.
-
-    Args:
-      entry: An instance of Transaction.
-    Returns:
-      A pair of
-        converted: boolean, true if a conversion was made.
-        entries: A list of the original entry if converted was False,
-          or a list of the split converted entries if True.
-    """
-    assert isinstance(entry, data.Transaction)
-
-    (postings_simple, postings_at_price, postings_at_cost) = postings_by_type(entry)
-
-    converted = postings_at_cost and postings_at_price
-    if converted:
-        # Generate a new entry for each currency conversion.
-        new_entries = []
-        replacement_postings = []
-        for posting_orig in postings_at_price:
-            weight = convert.get_weight(posting_orig)
-            posting_pos = data.Posting(posting_orig.account, weight, None,
-                                       None, None, None)
-            posting_neg = data.Posting(posting_orig.account, -weight, None,
-                                       None, None, None)
-
-            currency_entry = entry._replace(
-                postings=[posting_orig, posting_neg],
-                narration=entry.narration + ' (Currency conversion)')
-            new_entries.append(currency_entry)
-            replacement_postings.append(posting_pos)
-
-        converted_entry = entry._replace(postings=(
-            postings_at_cost + postings_simple + replacement_postings))
-        new_entries.append(converted_entry)
-    else:
-        new_entries = [entry]
-
-    return converted, new_entries
+from .common import ROUNDING_ACCOUNT
+from .common import quote_currency, postings_by_type
 
 
 class LedgerPrinter:
@@ -260,63 +148,3 @@ class LedgerPrinter:
 
     def Custom(_, entry, oss):
         pass  # Don't render anything.
-
-
-class HLedgerPrinter(LedgerPrinter):
-    "Multi-method for printing directives in HLedger format."
-
-    def Transaction(self, entry, oss):
-        strings = []
-
-        # Insert a posting to absorb the residual if necessary. This is
-        # sometimes needed because Ledger bases its balancing precision on the
-        # *last* number of digits used on that currency. This is believed to be
-        # a bug, so instead, we simply insert a rounding account to absorb the
-        # residual and precisely balance the transaction.
-        entry = interpolate.fill_residual_posting(entry, ROUNDING_ACCOUNT)
-
-        # Compute the string for the payee and narration line.
-        if entry.payee:
-            strings.append('{} |'.format(entry.payee))
-        if entry.narration:
-            strings.append(entry.narration)
-
-        oss.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(' '.join(strings),
-                                                         flag=entry.flag or '',
-                                                         e=entry))
-
-        if entry.tags:
-            oss.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
-        if entry.links:
-            oss.write('  ; Link: {}\n'.format(' '.join(sorted(entry.links))))
-
-        for posting in entry.postings:
-            self.Posting(posting, entry, oss)
-
-    def Posting(self, posting, entry, oss):
-        flag = '{} '.format(posting.flag) if posting.flag else ''
-        assert posting.account is not None
-
-        flag_posting = '{:}{:62}'.format(flag, posting.account)
-
-        pos_str = (position.to_string(posting, self.dformat, detail=False)
-                   if isinstance(posting.units, Amount)
-                   else '')
-        if pos_str:
-            # Convert the cost as a price entry, that's what HLedger appears to want.
-            pos_str = pos_str.replace('{', '@ ').replace('}', '')
-
-        price_str = ('@ {}'.format(posting.price.to_string(self.dformat_max))
-                     if posting.price is not None
-                     else '')
-
-        posting_str = '  {:64} {:>16} {:>16}'.format(flag_posting,
-                                                     quote_currency(pos_str),
-                                                     quote_currency(price_str))
-        oss.write(posting_str.rstrip())
-
-        oss.write('\n')
-
-    def Open(_, entry, oss):
-        # Not supported by HLedger AFAIK.
-        oss.write(';; Open: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
