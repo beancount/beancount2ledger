@@ -3,8 +3,12 @@
 This module contains reports that can convert an input file into other formats,
 such as Ledger.
 """
-__copyright__ = "Copyright (C) 2014-2017  Martin Blais"
-__license__ = "GNU GPLv2"
+
+# SPDX-FileCopyrightText: © 2014-2017 Martin Blais
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+__license__ = "GPL-2.0-only"
 
 import re
 import io

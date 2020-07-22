@@ -1,5 +1,8 @@
-__copyright__ = "Copyright (C) 2014-2016  Martin Blais"
-__license__ = "GNU GPLv2"
+# SPDX-FileCopyrightText: © 2014-2017 Martin Blais
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+__license__ = "GPL-2.0-only"
 
 import tempfile
 import datetime
