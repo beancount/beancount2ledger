@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+
+"""
+Beancount to Ledger converter
+"""
+
+# SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
+# SPDX-FileCopyrightText: © 2020 Martin Michlmayr <tbm@cyrius.com>
+
+# SPDX-License-Identifier: GPL-2.0-only
+
+from beancount2ledger.cli import cli
+
+cli()
