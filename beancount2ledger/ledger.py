@@ -226,7 +226,7 @@ class LedgerPrinter:
     def Price(self, entry):
         """Price entries"""
 
-        self.io.write('P {:%Y-%m-%d} 00:00:00 {:<16} {:>36}\n'.format(
+        self.io.write('P {:%Y-%m-%d} {:<16} {:>45}\n'.format(
             entry.date, quote_currency(entry.currency), str(entry.amount)))
 
     def Event(self, entry):

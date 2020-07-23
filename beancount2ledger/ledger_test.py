@@ -166,7 +166,7 @@ class TestLedgerConversion(test_utils.TestCase):
           account Assets:Cash
             assert commodity == "USD" | commodity == "CAD"
 
-          P 2014-02-15 00:00:00 HOOL                   500.00 USD
+          P 2014-02-15 HOOL                                                        500.00 USD
 
           2014-03-02 * Something
             Expenses:Restaurant                                                     50.02 USD
@@ -203,9 +203,9 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:CA:Investment:Cash    -2939.46 CAD @ 0.8879 USD
             Equity:Rounding             -0.003466 USD
 
-          P 2014-11-02 00:00:00 HOOL    520.0 USD
+          P 2014-11-02 HOOL    520.0 USD
 
-          P 2014-11-02 00:00:00 CAD    0.8879 USD
+          P 2014-11-02 CAD    0.8879 USD
 
         """, result)
 
@@ -349,6 +349,14 @@ class TestLedgerConversion(test_utils.TestCase):
         result = beancount2ledger.convert(entries)
         len_postings = [len(line) for line in result.split('\n')]
         self.assertEqual(len_postings[-4:-1], [75, 75, 75])
+
+    @loader.load_doc()
+    def test_price_alignment(self, entries, _, ___):
+        """
+          2020-07-23 price EUR 1.16 USD
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertEqual(len(result.split('\n')[0]), 75)
 
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',

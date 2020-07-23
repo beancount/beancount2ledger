@@ -7,6 +7,7 @@
 * Avoid adding two prices in hledger ([issue #2](https://github.com/beancount/beancount2ledger/issues/2))
 * Avoid trailing whitespace in account open declarations ([issue #6](https://github.com/beancount/beancount2ledger/issues/6))
 * Fix indentation issue in postings ([issue #8](https://github.com/beancount/beancount2ledger/issues/8))
+* Drop time information from price (`P`) entries
 * Add documentation
 
 ## 1.0 (2020-07-22)
