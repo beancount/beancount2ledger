@@ -232,6 +232,14 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:B                      -10.00 EUR
         """, result)
 
+    @loader.load_doc()
+    def test_account_open(self, entries, _, ___):
+        """
+          2019-01-25 open Assets:A
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertEqual("account Assets:A\n", result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',

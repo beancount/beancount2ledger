@@ -2,6 +2,7 @@
 
 ## 1.1 (unreleased)
 
+* Avoid trailing whitespace in account open declarations ([issue #6](https://github.com/beancount/beancount2ledger/issues/6))
 * Add documentation
 
 ## 1.0 (2020-07-22)

@@ -146,7 +146,7 @@ class LedgerPrinter:
     def Open(self, entry):
         """Account open statements"""
 
-        self.io.write('account {e.account:47}\n'.format(e=entry))
+        self.io.write('account {e.account}\n'.format(e=entry))
         if entry.currencies:
             self.io.write('  assert {}\n'.format(' | '.join(
                 'commodity == "{}"'.format(currency)
