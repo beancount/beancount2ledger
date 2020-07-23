@@ -48,6 +48,51 @@ class TestHLedgerConversion(test_utils.TestCase):
             Assets:B                      -10.00 EUR
         """, result)
 
+    @loader.load_doc()
+    def test_cost(self, entries, _, __):
+        """
+          2020-01-01 open Assets:Bank
+          2020-01-01 open Expenses:Grocery
+
+          2020-01-01 * "Grocery"  "Salad"
+              Expenses:Grocery                5 SALAD  {1.00 USD} @   1.00 USD
+              Assets:Bank
+
+          2020-01-01 * "Grocery"  "Salad"
+              Expenses:Grocery                5 SALAD  {1.00 USD} @@  5.00 USD
+              Assets:Bank
+
+          2020-01-01 * "Grocery"  "Salad"
+              Expenses:Grocery                5 SALAD {{5.00 USD}} @  1.00 USD
+              Assets:Bank
+
+          2020-01-01 * "Grocery"  "Salad"
+              Expenses:Grocery                5 SALAD {{5.00 USD}} @@ 5.00 USD
+              Assets:Bank
+        """
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines("""
+          ;; Open: 2020-01-01 close Assets:Bank
+
+          ;; Open: 2020-01-01 close Expenses:Grocery
+
+          2020-01-01 * Grocery | Salad
+            Expenses:Grocery                                                 5 SALAD @ 1.00 USD
+            Assets:Bank                                                             -5.00 USD
+
+          2020-01-01 * Grocery | Salad
+            Expenses:Grocery                                                 5 SALAD @ 1.00 USD
+            Assets:Bank                                                             -5.00 USD
+
+          2020-01-01 * Grocery | Salad
+            Expenses:Grocery                                                 5 SALAD @ 1.00 USD
+            Assets:Bank                                                             -5.00 USD
+
+          2020-01-01 * Grocery | Salad
+            Expenses:Grocery                                                 5 SALAD @ 1.00 USD
+            Assets:Bank                                                             -5.00 USD
+        """, result)
+
     def test_example(self):
         """
         Test converted example with hledger

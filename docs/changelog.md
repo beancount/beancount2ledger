@@ -4,6 +4,7 @@
 
 * Preserve metadata information ([issue #3](https://github.com/beancount/beancount2ledger/issues/3))
 * Preserve cost information (lot dates and lot labels/notes) ([issue #5](https://github.com/beancount/beancount2ledger/issues/5))
+* Avoid adding two prices in hledger ([issue #2](https://github.com/beancount/beancount2ledger/issues/2))
 * Avoid trailing whitespace in account open declarations ([issue #6](https://github.com/beancount/beancount2ledger/issues/6))
 * Add documentation
 

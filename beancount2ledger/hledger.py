@@ -61,7 +61,8 @@ class HLedgerPrinter(LedgerPrinter):
             pos_str = pos_str.replace('{', '@ ').replace('}', '')
 
         price_str = ('@ {}'.format(posting.price.to_string(self.dformat_max))
-                     if posting.price is not None else '')
+                     if posting.price is not None and posting.cost is None else
+                     '')
 
         posting_str = '  {:64} {:>16} {:>16}'.format(flag_posting,
                                                      quote_currency(pos_str),
