@@ -2,7 +2,7 @@ beancount2ledger(1)
 
 ; SPDX-FileCopyrightText: © 2020 Martin Michlmayr <tbm@cyrius.com>
 
-; SPDX-License-Identifier: GPL-2.0-only
+; SPDX-License-Identifier: GPL-2.0-or-later
 
 # NAME
 

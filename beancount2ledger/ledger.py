@@ -5,9 +5,9 @@ Convert Beancount entries to hledger
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
 # SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
 
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: GPL-2.0-or-later
 
-__license__ = "GPL-2.0-only"
+__license__ = "GPL-2.0-or-later"
 
 import datetime
 import io

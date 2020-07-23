@@ -1,11 +1,11 @@
 # License
 
-Beancount2ledger is distributed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-2.0.en.html) version 2.0.
+Beancount2ledger is distributed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-2.0.en.html) version 2.0 (or later).
 
-The [SPDX license identifier](https://spdx.org/licenses/) is [GPL-2.0-only](https://spdx.org/licenses/GPL-2.0-only):
+The [SPDX license identifier](https://spdx.org/licenses/) is [GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later):
 
 ```text
-SPDX-License-Identifier: GPL-2.0-only
+SPDX-License-Identifier: GPL-2.0-or-later
 ```
 
 ## Copyright

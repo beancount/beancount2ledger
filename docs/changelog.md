@@ -9,6 +9,7 @@
 * Fix indentation issue in postings ([issue #8](https://github.com/beancount/beancount2ledger/issues/8))
 * Drop time information from price (`P`) entries
 * Add documentation
+* Relicense under GPL-2.0-or-later ([issue #1](https://github.com/beancount/beancount2ledger/issues/1))
 
 ## 1.0 (2020-07-22)
 
