@@ -1,5 +1,5 @@
 """
-Tests for hledger conversion
+Tests for ledger conversion
 """
 
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
