@@ -127,7 +127,7 @@ class LedgerPrinter:
         flag = '{} '.format(posting.flag) if posting.flag else ''
         assert posting.account is not None
 
-        flag_posting = '{:}{:62}'.format(flag, posting.account)
+        flag_posting = '{:}{:54}'.format(flag, posting.account)
 
         # We can't use default=True, even though we're interested in the
         # cost details, but we have to add them ourselves in the format
@@ -157,7 +157,7 @@ class LedgerPrinter:
             else:
                 price_str = ''
 
-        posting_str = '  {:64} {} {}'.format(flag_posting,
+        posting_str = '  {:56} {:>16} {}'.format(flag_posting,
                                              quote_currency(pos_str),
                                              quote_currency(price_str))
         self.io.write(posting_str.rstrip())
@@ -226,7 +226,7 @@ class LedgerPrinter:
     def Price(self, entry):
         """Price entries"""
 
-        self.io.write('P {:%Y-%m-%d} 00:00:00 {:<16} {:>16}\n'.format(
+        self.io.write('P {:%Y-%m-%d} 00:00:00 {:<16} {:>36}\n'.format(
             entry.date, quote_currency(entry.currency), str(entry.amount)))
 
     def Event(self, entry):

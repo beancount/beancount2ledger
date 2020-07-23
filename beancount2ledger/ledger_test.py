@@ -337,6 +337,19 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:Bank                                                      -900.00 USD
         """, result)
 
+    @loader.load_doc()
+    def test_posting_alignment(self, entries, _, ___):
+        """
+          2020-01-01 open Assets:Test
+          2020-07-17 * "Test alignment of postings"
+            ! Assets:Test      6.00 EUR
+            Assets:Test        4.00 EUR
+            Assets:Test      -10.00 EUR
+        """
+        result = beancount2ledger.convert(entries)
+        len_postings = [len(line) for line in result.split('\n')]
+        self.assertEqual(len_postings[-4:-1], [75, 75, 75])
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',
