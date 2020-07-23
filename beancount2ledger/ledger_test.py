@@ -300,6 +300,43 @@ class TestLedgerConversion(test_utils.TestCase):
               ; bool:: false
         """, result)
 
+    @loader.load_doc()
+    def test_cost_info(self, entries, _, ___):
+        """
+          2020-01-01 open Expenses:Computers
+          2020-01-01 open Assets:Bank
+
+          2020-02-01 * "Super Shop"  "New computer"
+            Expenses:Computers       1 COMPUTER {900.00 USD, 2019-12-25, "DiscountedComputer"} @ 1100.00 USD
+            Assets:Bank
+
+          2020-02-02 * "Super Shop"  "New computer"
+            Expenses:Computers       1 COMPUTER {900.00 USD, "DiscountedComputer"} @ 1100.00 USD
+            Assets:Bank
+
+          2020-02-03 * "Super Shop"  "New computer"
+            Expenses:Computers       1 COMPUTER {900.00 USD, 2019-12-25} @ 1100.00 USD
+            Assets:Bank
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines("""
+          account Expenses:Computers
+
+          account Assets:Bank
+
+          2020-02-01 * Super Shop | New computer
+            Expenses:Computers                                               1 COMPUTER {900.00 USD} [2019-12-25] (DiscountedComputer) @ 1100.00 USD
+            Assets:Bank                                                      -900.00 USD
+
+          2020-02-02 * Super Shop | New computer
+            Expenses:Computers                                               1 COMPUTER {900.00 USD} (DiscountedComputer) @ 1100.00 USD
+            Assets:Bank                                                      -900.00 USD
+
+          2020-02-03 * Super Shop | New computer
+            Expenses:Computers                                               1 COMPUTER {900.00 USD} [2019-12-25] @ 1100.00 USD
+            Assets:Bank                                                      -900.00 USD
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',

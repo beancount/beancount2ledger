@@ -11,6 +11,7 @@ We have also had contributions and input from:
 
 * Alen Siljak (fixes)
 * John Wiegley (help with compatibility with ledger)
+* Marin Bernard (bug reports)
 * Simon Michael (help with compatibility with hledger)
 * Software in the Public Interest, Inc. (fixes)
 * Vikas Rawal (bug reports)

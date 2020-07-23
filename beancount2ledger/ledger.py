@@ -129,8 +129,16 @@ class LedgerPrinter:
 
         flag_posting = '{:}{:62}'.format(flag, posting.account)
 
+        # We can't use default=True, even though we're interested in the
+        # cost details, but we have to add them ourselves in the format
+        # expected by ledger.
         pos_str = (position.to_string(posting, self.dformat, detail=False)
                    if isinstance(posting.units, Amount) else '')
+        if posting.cost:
+            if posting.cost.date != entry.date:
+                pos_str += f" [{posting.cost.date}]"
+            if posting.cost.label:
+                pos_str += f" ({posting.cost.label})"
 
         if posting.price is not None:
             price_str = '@ {}'.format(
