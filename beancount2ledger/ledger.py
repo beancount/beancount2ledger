@@ -3,14 +3,18 @@ Convert Beancount entries to hledger
 """
 
 # SPDX-FileCopyrightText: © 2014-2017 Martin Blais
+# SPDX-FileCopyrightText: © 2020 Software in the Public Interest, Inc.
 
 # SPDX-License-Identifier: GPL-2.0-only
 
 __license__ = "GPL-2.0-only"
 
+import datetime
 import io
 
 from beancount.core.amount import Amount
+from beancount.core.inventory import Inventory
+from beancount.core.number import Decimal
 from beancount.core import position
 from beancount.core import amount
 from beancount.core import interpolate
@@ -18,6 +22,49 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import quote_currency, postings_by_type
+
+
+def user_meta(meta):
+    """
+    Get user defined metadata, i.e. skip some automatically added keys
+    """
+
+    ignore = [
+        '__tolerances__',
+        '__automatic__',
+        '__residual__',
+        'filename',
+        'lineno',
+    ]
+    return {key: meta[key] for key in meta if key not in ignore}
+
+
+def format_meta(key, val):
+    """"
+    Format metadata
+    """
+
+    # See write_metadata() in beancount/parser/printer.py for allowed types
+    if isinstance(val, str):
+        sep = ':'
+    elif isinstance(val, Decimal):
+        sep = '::'
+    elif isinstance(val, Amount):
+        sep = '::'
+    elif isinstance(val, datetime.date):
+        sep = '::'
+        val = f"[{val}]"
+    elif isinstance(val, bool):
+        sep = '::'
+        val = 'true' if val else 'false'
+    elif isinstance(val, (dict, Inventory)):
+        # Ignore dicts, don't print them out (according to printer.py)
+        return
+    elif val is None:
+        return f"{key}:"
+    else:
+        raise ValueError(f"Unexpected metadata type: {type(val)}")
+    return f"{key}{sep} {val}"
 
 
 class LedgerPrinter:
@@ -66,6 +113,11 @@ class LedgerPrinter:
             self.io.write('  ; Link: {}\n'.format(', '.join(
                 sorted(entry.links))))
 
+        for key, val in user_meta(entry.meta).items():
+            meta = format_meta(key, val)
+            if meta:
+                self.io.write(f'  ; {meta}\n')
+
         for posting in entry.postings:
             self.Posting(posting, entry)
 
@@ -103,6 +155,11 @@ class LedgerPrinter:
         self.io.write(posting_str.rstrip())
 
         self.io.write('\n')
+
+        for key, val in user_meta(posting.meta).items():
+            meta = format_meta(key, val)
+            if meta:
+                self.io.write(f'    ; {meta}\n')
 
     def Balance(self, entry):
         """Balance entries"""

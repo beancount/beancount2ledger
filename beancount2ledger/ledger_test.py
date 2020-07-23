@@ -240,6 +240,66 @@ class TestLedgerConversion(test_utils.TestCase):
         result = beancount2ledger.convert(entries)
         self.assertEqual("account Assets:A\n", result)
 
+    @loader.load_doc()
+    def test_metadata_entry(self, entries, _, ___):
+        """
+          2020-01-01 open Assets:Test
+
+          2020-07-23 * "Test metadata"
+            string: "foo"
+            year: 2020
+            amount: 10.00 EUR
+            date: 2020-07-19
+            none:
+            bool: TRUE
+            Assets:Test     10.00 EUR
+            Assets:Test    -10.00 EUR
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines("""
+          account Assets:Test
+
+          2020-07-23 * Test metadata
+            ; string: foo
+            ; year:: 2020
+            ; amount:: 10.00 EUR
+            ; date:: [2020-07-19]
+            ; none:
+            ; bool:: true
+            Assets:Test                                                      10.00 EUR
+            Assets:Test                                                      -10.00 EUR
+        """, result)
+
+    @loader.load_doc()
+    def test_metadata_posting(self, entries, _, ___):
+        """
+          2020-01-01 open Assets:Test
+
+          2020-07-23 * "Test metadata"
+            Assets:Test     10.00 EUR
+            Assets:Test    -10.00 EUR
+            string: "foo"
+            year: 2020
+            amount: 10.00 EUR
+            date: 2020-07-19
+            none:
+            bool: FALSE
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines("""
+          account Assets:Test
+
+          2020-07-23 * Test metadata
+            Assets:Test                                                      10.00 EUR
+            Assets:Test                                                      -10.00 EUR
+              ; string: foo
+              ; year:: 2020
+              ; amount:: 10.00 EUR
+              ; date:: [2020-07-19]
+              ; none:
+              ; bool:: false
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',

@@ -13,6 +13,7 @@ We have also had contributions and input from:
 * John Wiegley (help with compatibility with ledger)
 * Simon Michael (help with compatibility with hledger)
 * Software in the Public Interest, Inc. (fixes)
+* Vikas Rawal (bug reports)
 
 Thank you to all contributors and users!
 
