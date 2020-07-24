@@ -4,6 +4,12 @@
 
 Beancount2ledger converts files in the [beancount](https://beancount.github.io/) format to either [ledger](https://ledger-cli.org/) or [hledger](https://hledger.org/) output.
 
+# Installation
+
+You can install beancount2ledger with pip:
+
+    pip3 install beancount2ledger
+
 ## Usage
 
 Beancount2ledger takes a file argument, loads the file into beancount data structures, and converts the data to ledger output.

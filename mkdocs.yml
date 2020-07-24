@@ -17,6 +17,7 @@ theme:
 nav:
     - Introduction: index.md
     - Getting started:
+          - Installation: install.md
           - Usage: usage.md
     - About:
           - Release notes: changelog.md
