@@ -49,10 +49,9 @@ class HLedgerPrinter(LedgerPrinter):
             self.Posting(posting, entry)
 
     def Posting(self, posting, entry):
-        flag = '{} '.format(posting.flag) if posting.flag else ''
         assert posting.account is not None
-
-        flag_posting = '{:}{:62}'.format(flag, posting.account)
+        flag = f"{posting.flag} " if posting.flag else ''
+        flag_posting = f"{flag}{posting.account}"
 
         pos_str = (position.to_string(posting, self.dformat, detail=False)
                    if isinstance(posting.units, Amount) else '')
@@ -64,9 +63,11 @@ class HLedgerPrinter(LedgerPrinter):
                      if posting.price is not None and posting.cost is None else
                      '')
 
-        posting_str = '  {:64} {:>16} {:>16}'.format(flag_posting,
-                                                     quote_currency(pos_str),
-                                                     quote_currency(price_str))
+        # Width we have available for the amount: take width of
+        # flag_posting add 2 for the intentation of postings and
+        # add 2 to separate account from amount
+        len_amount = 76 - (len(flag_posting) + 2 + 2)
+        posting_str = f'  {flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
         self.io.write(posting_str.rstrip())
 
         self.io.write('\n')

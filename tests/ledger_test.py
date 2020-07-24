@@ -325,15 +325,15 @@ class TestLedgerConversion(test_utils.TestCase):
           account Assets:Bank
 
           2020-02-01 * Super Shop | New computer
-            Expenses:Computers                                               1 COMPUTER {900.00 USD} [2019-12-25] (DiscountedComputer) @ 1100.00 USD
+            Expenses:Computers  1 COMPUTER {900.00 USD} [2019-12-25] (DiscountedComputer) @ 1100.00 USD
             Assets:Bank                                                      -900.00 USD
 
           2020-02-02 * Super Shop | New computer
-            Expenses:Computers                                               1 COMPUTER {900.00 USD} (DiscountedComputer) @ 1100.00 USD
+            Expenses:Computers           1 COMPUTER {900.00 USD} (DiscountedComputer) @ 1100.00 USD
             Assets:Bank                                                      -900.00 USD
 
           2020-02-03 * Super Shop | New computer
-            Expenses:Computers                                               1 COMPUTER {900.00 USD} [2019-12-25] @ 1100.00 USD
+            Expenses:Computers                      1 COMPUTER {900.00 USD} [2019-12-25] @ 1100.00 USD
             Assets:Bank                                                      -900.00 USD
         """, result)
 
@@ -341,14 +341,21 @@ class TestLedgerConversion(test_utils.TestCase):
     def test_posting_alignment(self, entries, _, ___):
         """
           2020-01-01 open Assets:Test
+          2020-01-01 open Assets:TestTestTestTestTestTestTestTestTestTestTestTest
+          2020-01-01 open Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTest
           2020-07-17 * "Test alignment of postings"
-            ! Assets:Test      6.00 EUR
-            Assets:Test        4.00 EUR
-            Assets:Test      -10.00 EUR
+            * Assets:Test     1000000000.00 EUR
+            Assets:Test      -1000000000.00 EUR
+            * Assets:TestTestTestTestTestTestTestTestTestTestTestTest        1000.00 EUR
+            Assets:Test                                                     -1000.00 EUR
+            * Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTest     1000.00 EUR
+            Assets:Test                                                          -1000.00 EUR
+            * Assets:Test     100000.00 EUREUREUREUREUR
+            Assets:Test      -100000.00 EUREUREUREUREUR
         """
         result = beancount2ledger.convert(entries)
-        len_postings = [len(line) for line in result.split('\n')]
-        self.assertEqual(len_postings[-4:-1], [75, 75, 75])
+        len_postings = [len(line) for line in result.rstrip().split('\n')]
+        self.assertEqual(len_postings[-8:-1:2], [75, 75, 80, 75])
 
     @loader.load_doc()
     def test_price_alignment(self, entries, _, ___):
