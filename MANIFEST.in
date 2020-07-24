@@ -1,0 +1,5 @@
+# setuptools_scm ensures all required files are included,
+# we only need excludes here
+
+exclude .gitignore
+exclude .travis.yml
