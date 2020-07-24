@@ -1,0 +1,6 @@
+*.pyc
+__pycache__
+beancount2ledger.egg-info
+build
+dist
+docs/beancount2ledger.1
