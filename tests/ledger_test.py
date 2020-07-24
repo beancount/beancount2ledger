@@ -361,9 +361,12 @@ class TestLedgerConversion(test_utils.TestCase):
     def test_price_alignment(self, entries, _, ___):
         """
           2020-07-23 price EUR 1.16 USD
+          2020-07-24 price EUREUREUREUREUREUREUREUR 1.16 USD
+          2020-07-24 price EUREUREUREUREUREUREUREU1 1.16 USD
         """
         result = beancount2ledger.convert(entries)
-        self.assertEqual(len(result.split('\n')[0]), 75)
+        len_pricedb = [len(line) for line in result.rstrip().split('\n')]
+        self.assertEqual(len_pricedb[::2], [75, 75, 75])
 
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
