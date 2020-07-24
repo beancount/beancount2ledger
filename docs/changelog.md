@@ -1,6 +1,6 @@
-# beancount2ledger releases
+# Beancount2ledger releases
 
-## 1.1 (unreleased)
+## 1.1 (2020-07-24)
 
 * Preserve metadata information ([issue #3](https://github.com/beancount/beancount2ledger/issues/3))
 * Preserve cost information (lot dates and lot labels/notes) ([issue #5](https://github.com/beancount/beancount2ledger/issues/5))
