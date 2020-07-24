@@ -12,5 +12,5 @@ You can use the `--format` (`-f`) option to toggle between `ledger` and `hledger
 
 ## Documentation
 
-You can also [read the documentation online](https://beancount2ledger.readthedocs.io/) thanks to Read the Docs.
+You can [read the documentation online](https://beancount2ledger.readthedocs.io/) thanks to Read the Docs.
 
