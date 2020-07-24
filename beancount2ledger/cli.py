@@ -36,6 +36,11 @@ def cli():
         help=f"output format (default: {default})")
     parser.add_argument(
         'file', help='beancount file', type=argparse.FileType('r'))
+    parser.add_argument(
+        '-V',
+        "--version",
+        action="version",
+        version=f"%(prog)s {beancount2ledger.__version__}")
     args = parser.parse_args()
 
     print(beancount2ledger.convert_file(args.file.name, args.format))
