@@ -78,19 +78,19 @@ class TestHLedgerConversion(test_utils.TestCase):
 
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD
-            Assets:Bank                                                             -5.00 USD
+            Assets:Bank
 
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD
-            Assets:Bank                                                             -5.00 USD
+            Assets:Bank
 
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD
-            Assets:Bank                                                             -5.00 USD
+            Assets:Bank
 
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD
-            Assets:Bank                                                             -5.00 USD
+            Assets:Bank
         """, result)
 
     def test_example(self):

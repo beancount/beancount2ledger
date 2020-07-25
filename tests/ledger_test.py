@@ -186,7 +186,7 @@ class TestLedgerConversion(test_utils.TestCase):
 
           2014-03-02 * Something
             Expenses:Restaurant                                                     50.02 USD
-            Assets:Cash                                                            -50.02 USD
+            Assets:Cash
 
         """, result)
 
@@ -355,15 +355,15 @@ class TestLedgerConversion(test_utils.TestCase):
 
           2020-02-01 * Super Shop | New computer
             Expenses:Computers  1 COMPUTER {900.00 USD} [2019-12-25] (DiscountedComputer) @ 1100.00 USD
-            Assets:Bank                                                      -900.00 USD
+            Assets:Bank
 
           2020-02-02 * Super Shop | New computer
             Expenses:Computers           1 COMPUTER {900.00 USD} (DiscountedComputer) @ 1100.00 USD
-            Assets:Bank                                                      -900.00 USD
+            Assets:Bank
 
           2020-02-03 * Super Shop | New computer
             Expenses:Computers                      1 COMPUTER {900.00 USD} [2019-12-25] @ 1100.00 USD
-            Assets:Bank                                                      -900.00 USD
+            Assets:Bank
         """, result)
 
     @loader.load_doc()
@@ -388,6 +388,24 @@ class TestLedgerConversion(test_utils.TestCase):
         result = beancount2ledger.convert(entries)
         len_postings = [len(line) for line in result.rstrip().split('\n')]
         self.assertEqual(len_postings[-10:-1:2], [75, 75, 80, 98, 75])
+
+    @loader.load_doc()
+    def test_posting_no_amount(self, entries, _, ___):
+        """
+          2010-01-01 open Assets:Test
+
+          2020-07-25 txn "No amount on second posting"
+            Assets:Test                        10.00 EUR
+            Assets:Test
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines("""
+          account Assets:Test
+
+          2020-07-25 * No amount on second posting
+            Assets:Test                        10.00 EUR
+            Assets:Test
+        """, result)
 
     @loader.load_doc()
     def test_price_alignment(self, entries, _, ___):
