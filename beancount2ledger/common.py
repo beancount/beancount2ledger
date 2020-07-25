@@ -17,6 +17,16 @@ from beancount.core import amount
 ROUNDING_ACCOUNT = 'Equity:Rounding'
 
 
+def ledger_str(text):
+    """
+    Turn a beancount string into a valid ledger string.
+
+    Specifically, turn multi-line strings into a single line
+    """
+
+    return text.replace('\n', '\\n')
+
+
 def quote(match):
     """Add quotes around a re.MatchObject.
 

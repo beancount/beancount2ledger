@@ -13,7 +13,7 @@ from beancount.core import position
 from beancount.core import interpolate
 
 from .common import ROUNDING_ACCOUNT
-from .common import quote_currency
+from .common import ledger_str, quote_currency
 from .ledger import LedgerPrinter
 
 
@@ -32,9 +32,9 @@ class HLedgerPrinter(LedgerPrinter):
 
         # Compute the string for the payee and narration line.
         if entry.payee:
-            strings.append('{} |'.format(entry.payee))
+            strings.append(f"{ledger_str(entry.payee)} |")
         if entry.narration:
-            strings.append(entry.narration)
+            strings.append(ledger_str(entry.narration))
 
         self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
             ' '.join(strings), flag=entry.flag or '', e=entry))

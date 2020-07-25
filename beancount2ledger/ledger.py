@@ -21,7 +21,7 @@ from beancount.core import interpolate
 from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
-from .common import quote_currency, postings_by_type
+from .common import ledger_str, quote_currency, postings_by_type
 
 
 def user_meta(meta):
@@ -47,6 +47,7 @@ def format_meta(key, val):
     # See write_metadata() in beancount/parser/printer.py for allowed types
     if isinstance(val, str):
         sep = ':'
+        val = ledger_str(val)
     elif isinstance(val, Decimal):
         sep = '::'
     elif isinstance(val, Amount):
@@ -100,9 +101,9 @@ class LedgerPrinter:
 
         # Compute the string for the payee and narration line.
         if entry.payee:
-            strings.append('{} |'.format(entry.payee))
+            strings.append(f"{ledger_str(entry.payee)} |")
         if entry.narration:
-            strings.append(entry.narration)
+            strings.append(ledger_str(entry.narration))
 
         self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
             ' '.join(strings), flag=entry.flag or '', e=entry))

@@ -400,6 +400,33 @@ class TestLedgerConversion(test_utils.TestCase):
         len_pricedb = [len(line) for line in result.rstrip().split('\n')]
         self.assertEqual(len_pricedb[::2], [75, 75, 75])
 
+    @loader.load_doc()
+    def test_multiline_strings(self, entries, _, ___):
+        """
+          2010-01-01 open Assets:Test
+
+          2020-07-25 txn "Foo
+bar" "Foo
+bar
+bar"
+            meta: "Foo
+bar"
+            Assets:Test                        10.00 EUR
+            meta: "Foo
+bar"
+            Assets:Test                       -10.00 EUR
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(r"""
+          account Assets:Test
+
+          2020-07-25 * Foo\nbar | Foo\nbar\nbar
+            ; meta: Foo\nbar
+            Assets:Test                                                     10.00 EUR
+              ; meta: Foo\nbar
+            Assets:Test                                                    -10.00 EUR
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',
