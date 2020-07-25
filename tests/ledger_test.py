@@ -33,11 +33,27 @@ class TestLedgerUtilityFunctions(cmptest.TestCase):
           2014-10-01 * "Buy some stock with local funds"
             Assets:CA:Investment:HOOL          5 HOOL1 {500.00 USD}
             Expenses:Commissions            9.95 USD
+
+          2020-07-25 * "Test for quoted commodity"
+            Assets:Test                        1 E.R
+            Assets:Test                       -1 E.R
+
+          2020-07-25 * "Test for quoted commodity"
+            Assets:Test                        1 E-R
+            Assets:Test                       -1 E-R
         """
         expected = """
           2014-10-01 * "Buy some stock with local funds"
             Assets:CA:Investment:HOOL          5 "HOOL1" {500.00 USD}
             Expenses:Commissions            9.95 USD
+
+          2020-07-25 * "Test for quoted commodity"
+            Assets:Test                        1 "E.R"
+            Assets:Test                       -1 "E.R"
+
+          2020-07-25 * "Test for quoted commodity"
+            Assets:Test                        1 "E-R"
+            Assets:Test                       -1 "E-R"
         """
         self.assertEqual(expected, quote_currency(test))
 

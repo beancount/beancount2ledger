@@ -26,7 +26,7 @@ def quote(match):
       A quoted string of the match contents.
     """
     currency = match.group(1)
-    return '"{}"'.format(currency) if re.search(r'[0-9\.]',
+    return '"{}"'.format(currency) if re.search(r'[0-9\.-]',
                                                 currency) else currency
 
 
