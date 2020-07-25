@@ -113,7 +113,7 @@ class LedgerPrinter:
             self.io.write('  ; Link: {}\n'.format(', '.join(
                 sorted(entry.links))))
 
-        for key, val in user_meta(entry.meta).items():
+        for key, val in user_meta(entry.meta or {}).items():
             meta = format_meta(key, val)
             if meta:
                 self.io.write(f'  ; {meta}\n')
@@ -164,7 +164,7 @@ class LedgerPrinter:
         self.io.write(posting_str.rstrip())
         self.io.write('\n')
 
-        for key, val in user_meta(posting.meta).items():
+        for key, val in user_meta(posting.meta or {}).items():
             meta = format_meta(key, val)
             if meta:
                 self.io.write(f'    ; {meta}\n')

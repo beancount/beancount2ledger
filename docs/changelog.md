@@ -4,6 +4,7 @@
 
 * Quote commodities containing minus/dash (`-`) ([issue #15](https://github.com/beancount/beancount2ledger/issues/15))
 * Fix crash with very long account names ([issue #19](https://github.com/beancount/beancount2ledger/issues/19))
+* Fix crash when entry.meta or entry.posting are not set ([issue #16](https://github.com/beancount/beancount2ledger/issues/16))
 
 ## 1.1 (2020-07-24)
 

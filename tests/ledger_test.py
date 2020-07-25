@@ -317,6 +317,19 @@ class TestLedgerConversion(test_utils.TestCase):
         """, result)
 
     @loader.load_doc()
+    def test_metadata_none(self, entries, _, ___):
+        """
+          2000-01-01 open Assets:Test1
+          2000-01-01 open Assets:Test2
+
+          2019-01-21 pad Assets:Test1 Assets:Test2
+          2019-01-22 balance Assets:Test1   10.00 GBP
+        """
+        # padding (P) entries don't set entry.meta or posting.meta, so
+        # convert to make sure we don't crash.
+        _ = beancount2ledger.convert(entries)
+
+    @loader.load_doc()
     def test_cost_info(self, entries, _, ___):
         """
           2020-01-01 open Expenses:Computers
