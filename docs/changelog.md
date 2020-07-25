@@ -7,6 +7,7 @@
 * Show amounts only when they are specified in the source file ([issue #10](https://github.com/beancount/beancount2ledger/issues/10))
 * Fix crash with very long account names ([issue #19](https://github.com/beancount/beancount2ledger/issues/19))
 * Fix crash when entry.meta or entry.posting are not set ([issue #16](https://github.com/beancount/beancount2ledger/issues/16))
+* Use account declarations for hledger
 
 ## 1.1 (2020-07-24)
 

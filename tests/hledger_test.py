@@ -37,9 +37,9 @@ class TestHLedgerConversion(test_utils.TestCase):
         """
         result = beancount2ledger.convert(entries, "hledger")
         self.assertLines("""
-          ;; Open: 2019-01-25 close Assets:A
+          account Assets:A
 
-          ;; Open: 2019-01-25 close Assets:B
+          account Assets:B
 
           2019-01-25 * Test tags
             ; bar:, baz:, foo:
@@ -72,9 +72,9 @@ class TestHLedgerConversion(test_utils.TestCase):
         """
         result = beancount2ledger.convert(entries, "hledger")
         self.assertLines("""
-          ;; Open: 2020-01-01 close Assets:Bank
+          account Assets:Bank
 
-          ;; Open: 2020-01-01 close Expenses:Grocery
+          account Expenses:Grocery
 
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD

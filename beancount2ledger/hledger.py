@@ -73,8 +73,3 @@ class HLedgerPrinter(LedgerPrinter):
         self.io.write(posting_str.rstrip())
 
         self.io.write('\n')
-
-    def Open(self, entry):
-        # Not supported by HLedger AFAIK.
-        self.io.write(
-            ';; Open: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
