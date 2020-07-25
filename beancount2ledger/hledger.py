@@ -13,7 +13,7 @@ from beancount.core import position
 from beancount.core import interpolate
 
 from .common import ROUNDING_ACCOUNT
-from .common import ledger_str, quote_currency
+from .common import ledger_flag, ledger_str, quote_currency
 from .ledger import LedgerPrinter
 
 
@@ -36,8 +36,9 @@ class HLedgerPrinter(LedgerPrinter):
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
-        self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
-            ' '.join(strings), flag=entry.flag or '', e=entry))
+        flag = f"{ledger_flag(entry.flag)} " if ledger_flag(entry.flag) else ''
+        self.io.write('{e.date:%Y-%m-%d} {flag}{}\n'.format(
+            ' '.join(strings), flag=flag or '', e=entry))
 
         if entry.tags:
             self.io.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
@@ -50,7 +51,8 @@ class HLedgerPrinter(LedgerPrinter):
 
     def Posting(self, posting, entry):
         assert posting.account is not None
-        flag = f"{posting.flag} " if posting.flag else ''
+        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(
+            posting.flag) else ''
         flag_posting = f"{flag}{posting.account}"
 
         pos_str = (position.to_string(posting, self.dformat, detail=False)

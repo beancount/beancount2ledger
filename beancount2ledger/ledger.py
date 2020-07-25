@@ -21,7 +21,7 @@ from beancount.core import interpolate
 from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
-from .common import ledger_str, quote_currency, postings_by_type
+from .common import ledger_flag, ledger_str, quote_currency, postings_by_type
 
 
 def user_meta(meta):
@@ -105,8 +105,9 @@ class LedgerPrinter:
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
-        self.io.write('{e.date:%Y-%m-%d} {flag} {}\n'.format(
-            ' '.join(strings), flag=entry.flag or '', e=entry))
+        flag = f"{ledger_flag(entry.flag)} " if ledger_flag(entry.flag) else ''
+        self.io.write('{e.date:%Y-%m-%d} {flag}{}\n'.format(
+            ' '.join(strings), flag=flag, e=entry))
 
         if entry.tags:
             self.io.write('  ; :{}:\n'.format(':'.join(sorted(entry.tags))))
@@ -126,7 +127,8 @@ class LedgerPrinter:
         """Postings"""
 
         assert posting.account is not None
-        flag = f"{posting.flag} " if posting.flag else ''
+        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(
+            posting.flag) else ''
         flag_posting = f"{flag}{posting.account}"
 
         # We can't use default=True, even though we're interested in the

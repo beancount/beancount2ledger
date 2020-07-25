@@ -17,6 +17,15 @@ from beancount.core import amount
 ROUNDING_ACCOUNT = 'Equity:Rounding'
 
 
+def ledger_flag(flag):
+    """
+    Return the flag only if it's a valid flag in ledger
+    """
+
+    if flag and flag in ('*', '!'):
+        return flag
+
+
 def ledger_str(text):
     """
     Turn a beancount string into a valid ledger string.

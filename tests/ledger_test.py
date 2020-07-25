@@ -445,6 +445,32 @@ bar"
             Assets:Test                                                    -10.00 EUR
         """, result)
 
+    @loader.load_doc()
+    def test_flags(self, entries, _, ___):
+        """
+          2010-01-01 open Assets:Test
+
+          2020-07-25 txn "Valid flags"
+            * Assets:Test                        10.00 EUR
+            ! Assets:Test
+
+          2020-07-25 R "Invalid flags"
+            M Assets:Test                        10.00 EUR
+            S Assets:Test                       -10.00 EUR
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(r"""
+          account Assets:Test
+
+          2020-07-25 * Valid flags
+            * Assets:Test                                                   10.00 EUR
+            ! Assets:Test
+
+          2020-07-25 Invalid flags
+            Assets:Test                                                     10.00 EUR
+            Assets:Test                                                    -10.00 EUR
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',

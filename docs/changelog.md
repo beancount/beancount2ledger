@@ -4,6 +4,7 @@
 
 * Quote commodities containing minus/dash (`-`) ([issue #15](https://github.com/beancount/beancount2ledger/issues/15))
 * Turn multi-line strings into a single line ([issue #17](https://github.com/beancount/beancount2ledger/issues/17))
+* Ensure flags are valid in ledger ([issue #20](https://github.com/beancount/beancount2ledger/issues/20))
 * Show amounts only when they are specified in the source file ([issue #10](https://github.com/beancount/beancount2ledger/issues/10))
 * Fix crash with very long account names ([issue #19](https://github.com/beancount/beancount2ledger/issues/19))
 * Fix crash when entry.meta or entry.posting are not set ([issue #16](https://github.com/beancount/beancount2ledger/issues/16))
