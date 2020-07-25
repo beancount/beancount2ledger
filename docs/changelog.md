@@ -1,5 +1,9 @@
 # Beancount2ledger releases
 
+## 1.2 (unreleased)
+
+* Fix crash with very long account names ([issue #19](https://github.com/beancount/beancount2ledger/issues/19))
+
 ## 1.1 (2020-07-24)
 
 * Preserve metadata information ([issue #3](https://github.com/beancount/beancount2ledger/issues/3))

@@ -159,7 +159,7 @@ class LedgerPrinter:
         # Width we have available for the amount: take width of
         # flag_posting add 2 for the intentation of postings and
         # add 2 to separate account from amount
-        len_amount = 75 - (len(flag_posting) + 2 + 2)
+        len_amount = max(0, 75 - (len(flag_posting) + 2 + 2))
         posting_str = f'  {flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
         self.io.write(posting_str.rstrip())
         self.io.write('\n')

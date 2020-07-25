@@ -343,6 +343,7 @@ class TestLedgerConversion(test_utils.TestCase):
           2020-01-01 open Assets:Test
           2020-01-01 open Assets:TestTestTestTestTestTestTestTestTestTestTestTest
           2020-01-01 open Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTest
+          2010-01-01 open Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
           2020-07-17 * "Test alignment of postings"
             * Assets:Test     1000000000.00 EUR
             Assets:Test      -1000000000.00 EUR
@@ -350,12 +351,14 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:Test                                                     -1000.00 EUR
             * Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTest     1000.00 EUR
             Assets:Test                                                          -1000.00 EUR
+            Assets:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest  1000.00 EUR
+            Assets:Test                                                                         -1000.00 EUR
             * Assets:Test     100000.00 EUREUREUREUREUR
             Assets:Test      -100000.00 EUREUREUREUREUR
         """
         result = beancount2ledger.convert(entries)
         len_postings = [len(line) for line in result.rstrip().split('\n')]
-        self.assertEqual(len_postings[-8:-1:2], [75, 75, 80, 75])
+        self.assertEqual(len_postings[-10:-1:2], [75, 75, 80, 98, 75])
 
     @loader.load_doc()
     def test_price_alignment(self, entries, _, ___):
