@@ -1,6 +1,6 @@
 # Beancount2ledger releases
 
-## 1.2 (unreleased)
+## 1.2 (2020-07-25)
 
 * Quote commodities containing minus/dash (`-`) ([issue #15](https://github.com/beancount/beancount2ledger/issues/15))
 * Turn multi-line strings into a single line ([issue #17](https://github.com/beancount/beancount2ledger/issues/17))
