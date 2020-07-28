@@ -26,6 +26,9 @@ beancount2ledger - beancount to ledger converter
 *-h, --help*
 	Show help message and quit.
 
+*-V, --version*
+	Show version and quit.
+
 # USAGE
 
 *beancount2ledger* takes a file argument, loads the file into *beancount* data structures, and converts the data to *ledger* output.
