@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: © 2020 Martin Michlmayr <tbm@cyrius.com>
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: Unit tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        python:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - if: matrix.os == 'ubuntu-latest'
+        run: sudo apt install ledger
+      - if: matrix.os == 'macos-latest'
+        run: brew install ledger
+      - run: pip install -r requirements.txt
+      - run: python -m pytest
