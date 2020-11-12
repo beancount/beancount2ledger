@@ -23,6 +23,9 @@ beancount2ledger - beancount to ledger converter
 
 	When *beancount2ledger* is called, the default format is _ledger_ whereas the default format is _hledger_ when *beancount2hledger* is called.
 
+*-c, --config*
+	Specify a configuration file.  The options of the configuration file are described in *beancount2ledger*(5) and the *beancount2ledger* manual.
+
 *-h, --help*
 	Show help message and quit.
 
@@ -32,6 +35,14 @@ beancount2ledger - beancount to ledger converter
 # USAGE
 
 *beancount2ledger* takes a file argument, loads the file into *beancount* data structures, and converts the data to *ledger* output.
+
+# FILES
+
+_$PWD/.beancount2ledger.yaml_
+	The configuration file for the current directory.
+
+_$HOME/.config/beancount2ledger/config.yaml_
+	The default configuration file.
 
 # BUGS
 
@@ -47,5 +58,5 @@ Martin Blais, Martin Michlmayr, and others
 
 # SEE ALSO
 
-*ledger*(1), *hledger*(1)
+*beancount2ledger*(5), *ledger*(1), *hledger*(1)
 

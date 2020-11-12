@@ -144,3 +144,13 @@ def split_currency_conversions(entry):
         new_entries = [entry]
 
     return converted, new_entries
+
+
+def set_default(config):
+    """
+    Set some defaults for the config
+    """
+
+    if not "indent" in config:
+        config["indent"] = 2
+    return config

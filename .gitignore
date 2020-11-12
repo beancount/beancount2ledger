@@ -4,3 +4,4 @@ beancount2ledger.egg-info
 build
 dist
 docs/beancount2ledger.1
+docs/beancount2ledger.5

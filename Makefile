@@ -7,11 +7,15 @@ all: docs
 docs/beancount2ledger.1: docs/beancount2ledger.1.scd
 	scdoc < $< > $@
 
-man: docs/beancount2ledger.1
+docs/beancount2ledger.5: docs/beancount2ledger.5.scd
+	scdoc < $< > $@
+
+man: docs/beancount2ledger.1 docs/beancount2ledger.5
 
 docs: man
 
 clean:
 	rm -f docs/beancount2ledger.1
+	rm -f docs/beancount2ledger.5
 
 .PHONY: all clean docs

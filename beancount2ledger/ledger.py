@@ -22,6 +22,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, postings_by_type
+from .common import set_default
 
 
 def user_meta(meta):
@@ -73,13 +74,14 @@ class LedgerPrinter:
 
     # pylint: disable=invalid-name
 
-    def __init__(self, dcontext=None):
+    def __init__(self, dcontext=None, config={}):
         self.io = None
         self.dcontext = dcontext or display_context.DEFAULT_DISPLAY_CONTEXT
         self.dformat = self.dcontext.build(
             precision=display_context.Precision.MOST_COMMON)
         self.dformat_max = self.dcontext.build(
             precision=display_context.Precision.MAXIMUM)
+        self.config = set_default(config)
 
     def __call__(self, obj):
         self.io = io.StringIO()
@@ -113,16 +115,19 @@ class LedgerPrinter:
             self.io.write(' ' + payee)
         self.io.write('\n')
 
+        indent = ' ' * self.config["indent"]
+
         if entry.tags:
-            self.io.write('  ; :{}:\n'.format(':'.join(sorted(entry.tags))))
+            self.io.write(indent +
+                          '; :{}:\n'.format(':'.join(sorted(entry.tags))))
         if entry.links:
-            self.io.write('  ; Link: {}\n'.format(', '.join(
-                sorted(entry.links))))
+            self.io.write(
+                indent + '; Link: {}\n'.format(', '.join(sorted(entry.links))))
 
         for key, val in user_meta(entry.meta or {}).items():
             meta = format_meta(key, val)
             if meta:
-                self.io.write(f'  ; {meta}\n')
+                self.io.write(indent + f'; {meta}\n')
 
         for posting in entry.postings:
             self.Posting(posting, entry)
@@ -164,20 +169,22 @@ class LedgerPrinter:
                 price_str = ''
 
         if posting.meta and '__automatic__' in posting.meta and not '__residual__' in posting.meta:
-            posting_str = f'  {flag_posting}'
+            posting_str = f'{flag_posting}'
         else:
             # Width we have available for the amount: take width of
-            # flag_posting add 2 for the indentation of postings and
-            # add 2 to separate account from amount
-            len_amount = max(0, 75 - (len(flag_posting) + 2 + 2))
-            posting_str = f'  {flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
-        self.io.write(posting_str.rstrip())
+            # flag_posting add config["indent"] for the indentation
+            # of postings and add 2 to separate account from amount
+            len_amount = max(
+                0, 75 - (len(flag_posting) + self.config["indent"] + 2))
+            posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
+        indent = ' ' * self.config["indent"]
+        self.io.write(indent + posting_str.rstrip())
         self.io.write('\n')
 
         for key, val in user_meta(posting.meta or {}).items():
             meta = format_meta(key, val)
             if meta:
-                self.io.write(f'    ; {meta}\n')
+                self.io.write(2 * indent + f'; {meta}\n')
 
     def Balance(self, entry):
         """Balance entries"""

@@ -1,5 +1,9 @@
 # Beancount2ledger releases
 
+## 1.3 (unreleased)
+
+* Add config option `indent`
+
 ## 1.2 (2020-07-25)
 
 * Quote commodities containing minus/dash (`-`) ([issue #15](https://github.com/beancount/beancount2ledger/issues/15))

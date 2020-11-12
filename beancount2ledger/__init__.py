@@ -21,22 +21,22 @@ except DistributionNotFound:
     __version__ = "undistributed"
 
 
-def convert(entries, output_format="ledger"):
+def convert(entries, output_format="ledger", config={}):
     """
     Convert beancount entries to ledger output
     """
 
     if output_format == "hledger":
-        printer = HLedgerPrinter()
+        printer = HLedgerPrinter(config=config)
     else:
-        printer = LedgerPrinter()
+        printer = LedgerPrinter(config=config)
     return '\n'.join(printer(entry) for entry in entries)
 
 
-def convert_file(file, output_format="ledger"):
+def convert_file(file, output_format="ledger", config={}):
     """
     Convert beancount file to ledger output
     """
 
     entries, _, __ = loader.load_file(file)
-    return convert(entries, output_format)
+    return convert(entries, output_format, config=config)

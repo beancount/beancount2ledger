@@ -44,11 +44,14 @@ class HLedgerPrinter(LedgerPrinter):
             self.io.write(' ' + payee)
         self.io.write('\n')
 
+        indent = ' ' * self.config["indent"]
+
         if entry.tags:
-            self.io.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
+            self.io.write(indent +
+                          '; {}:\n'.format(':, '.join(sorted(entry.tags))))
         if entry.links:
-            self.io.write('  ; Link: {}\n'.format(' '.join(
-                sorted(entry.links))))
+            self.io.write(indent +
+                          '; Link: {}\n'.format(' '.join(sorted(entry.links))))
 
         for posting in entry.postings:
             self.Posting(posting, entry)
@@ -69,13 +72,14 @@ class HLedgerPrinter(LedgerPrinter):
                      if posting.price is not None and posting.cost is None else
                      '')
         if posting.meta and '__automatic__' in posting.meta and not '__residual__' in posting.meta:
-            posting_str = f'  {flag_posting}'
+            posting_str = f'{flag_posting}'
         else:
             # Width we have available for the amount: take width of
-            # flag_posting add 2 for the indentation of postings and
-            # add 2 to separate account from amount
+            # flag_posting add config["indent"] for the indentation
+            # of postings and add 2 to separate account from amount
             len_amount = max(0, 76 - (len(flag_posting) + 2 + 2))
-            posting_str = f'  {flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
-        self.io.write(posting_str.rstrip())
+            posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
+        indent = ' ' * self.config["indent"]
+        self.io.write(indent + posting_str.rstrip())
 
         self.io.write('\n')

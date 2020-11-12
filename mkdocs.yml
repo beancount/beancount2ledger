@@ -19,6 +19,7 @@ nav:
     - Getting started:
           - Installation: install.md
           - Usage: usage.md
+          - Configuration: configuration.md
     - About:
           - Release notes: changelog.md
           - Bugs and contributions: contributing.md
