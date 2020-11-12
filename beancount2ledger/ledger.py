@@ -101,6 +101,11 @@ class LedgerPrinter:
         flag = ledger_flag(entry.flag)
         if flag:
             self.io.write(' ' + flag)
+        code_key = self.config.get("code")
+        if code_key and not meta.get(code_key) is None:
+            code = meta[code_key]
+            self.io.write(' (' + str(code) + ')')
+            del meta[code_key]
         payee = ' '.join(strings)
         if payee:
             self.io.write(' ' + payee)

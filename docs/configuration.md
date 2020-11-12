@@ -21,3 +21,6 @@ auxdate
 postdate
 :   A metadata key that specifies metadata that should become the date of a posting (`date` in hledger).
 
+code
+:   A metadata key that specifies metadata that should become the code of a transaction.
+

@@ -19,6 +19,9 @@ beancount2ledger - configuration file for *beancount2ledger*
 *postdate* <string>
 	A metadata key that specifies metadata that should become the date of a posting (*date* in hledger).
 
+*code* <string>
+	A metadata key that specifies metadata that should become the code of a transaction.
+
 # FORMAT
 
 The configuration file uses YAML.

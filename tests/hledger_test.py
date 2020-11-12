@@ -287,6 +287,114 @@ class TestHLedgerConversion(test_utils.TestCase):
                 ; date2: 2020-11-04
         """, result)
 
+    @loader.load_doc()
+    def test_code(self, entries, _, ___):
+        """
+            2020-01-01 open Assets:Test
+
+            2020-01-01 open Equity:Opening-Balance
+
+            2020-11-12 * "No code"
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Code is integer"
+              code: 1234
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Code is string"
+              code: "string"
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Code is date"
+              code: 2020-11-12
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Code is empty"
+              code:
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Code and aux-date"
+              aux-date: 2020-11-03
+              code: 1234
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+        """
+
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines(r"""
+            account Assets:Test
+
+            account Equity:Opening-Balance
+
+            2020-11-12 * No code
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Code is integer
+              ; code: 1234
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Code is string
+              ; code: string
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Code is date
+              ; code: 2020-11-12
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Code is empty
+              ; code:
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Code and aux-date
+              ; aux-date: 2020-11-03
+              ; code: 1234
+              Assets:Test                                                     10.00 EUR
+              Equity:Opening-Balance
+        """, result)
+
+        config = {"code": "code", "auxdate": "aux-date"}
+        result = beancount2ledger.convert(entries, "hledger", config=config)
+        self.assertLines(r"""
+            account Assets:Test
+
+            account Equity:Opening-Balance
+
+            2020-11-12 * No code
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+
+            2020-11-12 * (1234) Code is integer
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+
+            2020-11-12 * (string) Code is string
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+
+            2020-11-12 * (2020-11-12) Code is date
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+
+            2020-11-12 * Code is empty
+                ; code:
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+
+            2020-11-12=2020-11-03 * (1234) Code and aux-date
+                Assets:Test                                                   10.00 EUR
+                Equity:Opening-Balance
+        """, result)
+
     def test_example(self):
         """
         Test converted example with hledger
