@@ -424,14 +424,14 @@ class TestLedgerConversion(test_utils.TestCase):
           2010-01-01 open Assets:Test
 
           2020-07-25 txn "Foo
-bar" "Foo
-bar
-bar"
+          bar" "Foo
+          bar
+          bar"
             meta: "Foo
-bar"
+          bar"
             Assets:Test                        10.00 EUR
             meta: "Foo
-bar"
+          bar"
             Assets:Test                       -10.00 EUR
         """
         result = beancount2ledger.convert(entries)
