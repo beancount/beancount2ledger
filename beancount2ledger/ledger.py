@@ -21,52 +21,8 @@ from beancount.core import interpolate
 from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
-from .common import ledger_flag, ledger_str, quote_currency, postings_by_type
+from .common import ledger_flag, ledger_str, quote_currency, postings_by_type, user_meta
 from .common import set_default
-
-
-def user_meta(meta):
-    """
-    Get user defined metadata, i.e. skip some automatically added keys
-    """
-
-    ignore = [
-        '__tolerances__',
-        '__automatic__',
-        '__residual__',
-        'filename',
-        'lineno',
-    ]
-    return {key: meta[key] for key in meta if key not in ignore}
-
-
-def format_meta(key, val):
-    """"
-    Format metadata
-    """
-
-    # See write_metadata() in beancount/parser/printer.py for allowed types
-    if isinstance(val, str):
-        sep = ':'
-        val = ledger_str(val)
-    elif isinstance(val, Decimal):
-        sep = '::'
-    elif isinstance(val, Amount):
-        sep = '::'
-    elif isinstance(val, datetime.date):
-        sep = '::'
-        val = f"[{val}]"
-    elif isinstance(val, bool):
-        sep = '::'
-        val = 'true' if val else 'false'
-    elif isinstance(val, (dict, Inventory)):
-        # Ignore dicts, don't print them out (according to printer.py)
-        return
-    elif val is None:
-        return f"{key}:"
-    else:
-        raise ValueError(f"Unexpected metadata type: {type(val)}")
-    return f"{key}{sep} {val}"
 
 
 class LedgerPrinter:
@@ -88,6 +44,36 @@ class LedgerPrinter:
         method = getattr(self, obj.__class__.__name__)
         method(obj)
         return self.io.getvalue()
+
+
+    def format_meta(self, key, val):
+        """"
+        Format metadata
+        """
+
+        # See write_metadata() in beancount/parser/printer.py for allowed types
+        if isinstance(val, str):
+            sep = ':'
+            val = ledger_str(val)
+        elif isinstance(val, Decimal):
+            sep = '::'
+        elif isinstance(val, Amount):
+            sep = '::'
+        elif isinstance(val, datetime.date):
+            sep = '::'
+            val = f"[{val}]"
+        elif isinstance(val, bool):
+            sep = '::'
+            val = 'true' if val else 'false'
+        elif isinstance(val, (dict, Inventory)):
+            # Ignore dicts, don't print them out (according to printer.py)
+            return
+        elif val is None:
+            return f"{key}:"
+        else:
+            raise ValueError(f"Unexpected metadata type: {type(val)}")
+        return f"{key}{sep} {val}"
+
 
     def Transaction(self, entry):
         """Transactions"""
@@ -125,7 +111,7 @@ class LedgerPrinter:
                 indent + '; Link: {}\n'.format(', '.join(sorted(entry.links))))
 
         for key, val in user_meta(entry.meta or {}).items():
-            meta = format_meta(key, val)
+            meta = self.format_meta(key, val)
             if meta:
                 self.io.write(indent + f'; {meta}\n')
 
@@ -182,7 +168,7 @@ class LedgerPrinter:
         self.io.write('\n')
 
         for key, val in user_meta(posting.meta or {}).items():
-            meta = format_meta(key, val)
+            meta = self.format_meta(key, val)
             if meta:
                 self.io.write(2 * indent + f'; {meta}\n')
 

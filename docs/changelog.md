@@ -3,6 +3,7 @@
 ## 1.3 (unreleased)
 
 * Add config option `indent`
+* Show metadata with hledger output
 
 ## 1.2 (2020-07-25)
 

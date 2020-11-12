@@ -13,12 +13,22 @@ from beancount.core import position
 from beancount.core import interpolate
 
 from .common import ROUNDING_ACCOUNT
-from .common import ledger_flag, ledger_str, quote_currency
+from .common import ledger_flag, ledger_str, quote_currency, user_meta
 from .ledger import LedgerPrinter
 
 
 class HLedgerPrinter(LedgerPrinter):
     "Multi-method for printing directives in HLedger format."
+
+    def format_meta(self, key, val):
+        """"
+        Format metadata
+        """
+
+        if val is None:
+            return f"{key}:"
+        return f"{key}: {val}"
+
 
     def Transaction(self, entry):
         # Insert a posting to absorb the residual if necessary. This is
@@ -53,6 +63,11 @@ class HLedgerPrinter(LedgerPrinter):
             self.io.write(indent +
                           '; Link: {}\n'.format(' '.join(sorted(entry.links))))
 
+        for key, val in user_meta(entry.meta or {}).items():
+            meta = self.format_meta(key, val)
+            if meta:
+                self.io.write(indent + f'; {meta}\n')
+
         for posting in entry.postings:
             self.Posting(posting, entry)
 
@@ -81,5 +96,9 @@ class HLedgerPrinter(LedgerPrinter):
             posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
         indent = ' ' * self.config["indent"]
         self.io.write(indent + posting_str.rstrip())
-
         self.io.write('\n')
+
+        for key, val in user_meta(posting.meta or {}).items():
+            meta = self.format_meta(key, val)
+            if meta:
+                self.io.write(2 * indent + f'; {meta}\n')

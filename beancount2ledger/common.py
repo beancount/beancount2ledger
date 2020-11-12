@@ -154,3 +154,18 @@ def set_default(config):
     if not "indent" in config:
         config["indent"] = 2
     return config
+
+
+def user_meta(meta):
+    """
+    Get user defined metadata, i.e. skip some automatically added keys
+    """
+
+    ignore = [
+        '__tolerances__',
+        '__automatic__',
+        '__residual__',
+        'filename',
+        'lineno',
+    ]
+    return {key: meta[key] for key in meta if key not in ignore}
