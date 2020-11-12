@@ -8,6 +8,8 @@ Convert Beancount entries to hledger
 
 __license__ = "GPL-2.0-or-later"
 
+import datetime
+
 from beancount.core.amount import Amount
 from beancount.core import position
 from beancount.core import interpolate
@@ -45,7 +47,12 @@ class HLedgerPrinter(LedgerPrinter):
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
+        meta = user_meta(entry.meta or {})
         self.io.write(f"{entry.date:%Y-%m-%d}")
+        auxdate_key = self.config.get("auxdate")
+        if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
+            self.io.write(f"={meta[auxdate_key]:%Y-%m-%d}")
+            del meta[auxdate_key]
         flag = ledger_flag(entry.flag)
         if flag:
             self.io.write(' ' + flag)
@@ -63,7 +70,7 @@ class HLedgerPrinter(LedgerPrinter):
             self.io.write(indent +
                           '; Link: {}\n'.format(' '.join(sorted(entry.links))))
 
-        for key, val in user_meta(entry.meta or {}).items():
+        for key, val in meta.items():
             meta = self.format_meta(key, val)
             if meta:
                 self.io.write(indent + f'; {meta}\n')
@@ -98,7 +105,19 @@ class HLedgerPrinter(LedgerPrinter):
         self.io.write(indent + posting_str.rstrip())
         self.io.write('\n')
 
-        for key, val in user_meta(posting.meta or {}).items():
-            meta = self.format_meta(key, val)
+        meta = user_meta(posting.meta or {})
+        postdate_key = self.config.get("postdate")
+        if postdate_key and isinstance(meta.get(postdate_key), datetime.date):
+            postdate = meta[postdate_key]
+            del meta[postdate_key]
+            meta["date"] = postdate
+        auxdate_key = self.config.get("auxdate")
+        if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
+            auxdate = meta[auxdate_key]
+            del meta[auxdate_key]
+            meta["date2"] = auxdate
+
+        for key, val in meta.items():
+            formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(2 * indent + f'; {meta}\n')
+                self.io.write(2 * indent + f'; {formatted_meta}\n')

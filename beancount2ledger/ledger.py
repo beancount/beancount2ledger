@@ -92,7 +92,12 @@ class LedgerPrinter:
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
+        meta = user_meta(entry.meta or {})
         self.io.write(f"{entry.date:%Y-%m-%d}")
+        auxdate_key = self.config.get("auxdate")
+        if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
+            self.io.write(f"={meta[auxdate_key]:%Y-%m-%d}")
+            del meta[auxdate_key]
         flag = ledger_flag(entry.flag)
         if flag:
             self.io.write(' ' + flag)
@@ -110,10 +115,10 @@ class LedgerPrinter:
             self.io.write(
                 indent + '; Link: {}\n'.format(', '.join(sorted(entry.links))))
 
-        for key, val in user_meta(entry.meta or {}).items():
-            meta = self.format_meta(key, val)
+        for key, val in meta.items():
+            formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(indent + f'; {meta}\n')
+                self.io.write(indent + f'; {formatted_meta}\n')
 
         for posting in entry.postings:
             self.Posting(posting, entry)
@@ -165,12 +170,24 @@ class LedgerPrinter:
             posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
         indent = ' ' * self.config["indent"]
         self.io.write(indent + posting_str.rstrip())
+        meta = user_meta(posting.meta or {})
+        dates = []
+        postdate_key = self.config.get("postdate")
+        if postdate_key and isinstance(meta.get(postdate_key), datetime.date):
+            dates.append(str(meta[postdate_key]))
+            del meta[postdate_key]
+        auxdate_key = self.config.get("auxdate")
+        if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
+            dates.append('=' + str(meta[auxdate_key]))
+            del meta[auxdate_key]
+        if dates:
+            self.io.write('  ; [' + ''.join(dates) + ']')
         self.io.write('\n')
 
-        for key, val in user_meta(posting.meta or {}).items():
-            meta = self.format_meta(key, val)
+        for key, val in meta.items():
+            formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(2 * indent + f'; {meta}\n')
+                self.io.write(2 * indent + f'; {formatted_meta}\n')
 
     def Balance(self, entry):
         """Balance entries"""

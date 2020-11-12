@@ -153,6 +153,140 @@ class TestHLedgerConversion(test_utils.TestCase):
               ; bool: False
         """, result)
 
+    @loader.load_doc()
+    def test_auxdate(self, entries, _, ___):
+        """
+            2020-01-01 open Assets:Test
+            2020-01-01 open Equity:Opening-Balance
+
+            2020-11-12 * "Test with aux date"
+              aux-date: 2020-11-03
+              Assets:Test                        10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * "Test with transaction and posting aux date"
+              aux-date: 2020-11-03
+              Assets:Test                        10.00 EUR
+                aux-date: 2020-11-04
+              Equity:Opening-Balance
+
+            2020-11-12 * "Test with posting date"
+              Assets:Test                        10.00 EUR
+                postdate: 2020-11-03
+              Equity:Opening-Balance            -10.00 EUR
+                postdate: 2020-11-04
+                test: "foo"
+
+            2020-11-12 * "Testing with posting date and posting aux date"
+              Assets:Test                        10.00 EUR
+                aux-date: 2020-11-04
+                postdate: 2020-11-03
+              Equity:Opening-Balance            -10.00 EUR
+                postdate: 2020-11-03
+                aux-date: 2020-11-04
+                test: "foo"
+        """
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines(r"""
+            account Assets:Test
+
+            account Equity:Opening-Balance
+
+            2020-11-12 * Test with aux date
+              ; aux-date: 2020-11-03
+              Assets:Test                                                      10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12 * Test with transaction and posting aux date
+              ; aux-date: 2020-11-03
+              Assets:Test                                                      10.00 EUR
+                ; aux-date: 2020-11-04
+              Equity:Opening-Balance
+
+            2020-11-12 * Test with posting date
+              Assets:Test                                                      10.00 EUR
+                ; postdate: 2020-11-03
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; postdate: 2020-11-04
+                ; test: foo
+
+            2020-11-12 * Testing with posting date and posting aux date
+              Assets:Test                                                      10.00 EUR
+                ; aux-date: 2020-11-04
+                ; postdate: 2020-11-03
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; postdate: 2020-11-03
+                ; aux-date: 2020-11-04
+                ; test: foo
+
+        """, result)
+
+        config = {"auxdate": "aux-date", "postdate": "postdate"}
+        result = beancount2ledger.convert(entries, "hledger", config=config)
+        self.assertLines(r"""
+            account Assets:Test
+
+            account Equity:Opening-Balance
+
+            2020-11-12=2020-11-03 * Test with aux date
+              Assets:Test                                                      10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12=2020-11-03 * Test with transaction and posting aux date
+              Assets:Test                                                      10.00 EUR
+                ; date2: 2020-11-04
+              Equity:Opening-Balance
+
+            2020-11-12 * Test with posting date
+              Assets:Test                                                      10.00 EUR
+                ; date: 2020-11-03
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; test: foo
+                ; date: 2020-11-04
+
+            2020-11-12 * Testing with posting date and posting aux date
+              Assets:Test                                                      10.00 EUR
+                ; date: 2020-11-03
+                ; date2: 2020-11-04
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; test: foo
+                ; date: 2020-11-03
+                ; date2: 2020-11-04
+        """, result)
+
+        config = {"auxdate": "aux-date"}
+        result = beancount2ledger.convert(entries, "hledger", config=config)
+        self.assertLines(r"""
+            account Assets:Test
+
+            account Equity:Opening-Balance
+
+            2020-11-12=2020-11-03 * Test with aux date
+              Assets:Test                                                      10.00 EUR
+              Equity:Opening-Balance
+
+            2020-11-12=2020-11-03 * Test with transaction and posting aux date
+              Assets:Test                                                      10.00 EUR
+                ; date2: 2020-11-04
+              Equity:Opening-Balance
+
+            2020-11-12 * Test with posting date
+              Assets:Test                                                      10.00 EUR
+                ; postdate: 2020-11-03
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; postdate: 2020-11-04
+                ; test: foo
+
+            2020-11-12 * Testing with posting date and posting aux date
+              Assets:Test                                                      10.00 EUR
+                ; postdate: 2020-11-03
+                ; date2: 2020-11-04
+              Equity:Opening-Balance                                          -10.00 EUR
+                ; postdate: 2020-11-03
+                ; test: foo
+                ; date2: 2020-11-04
+        """, result)
+
     def test_example(self):
         """
         Test converted example with hledger

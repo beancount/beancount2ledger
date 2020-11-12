@@ -14,3 +14,10 @@ indent
 
 :   The number of spaces to indent postings (default: 2).
 
+auxdate
+
+:   A metadata key that specifies metadata that should become the auxiliary date of a transaction or posting (`date2` in hledger).
+
+postdate
+:   A metadata key that specifies metadata that should become the date of a posting (`date` in hledger).
+

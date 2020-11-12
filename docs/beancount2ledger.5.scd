@@ -13,6 +13,12 @@ beancount2ledger - configuration file for *beancount2ledger*
 *indent* <integer>
 	The number of spaces to indent postings (default: 2).
 
+*auxdate* <string>
+	A metadata key that specifies metadata that should become the auxiliary date of a transaction or posting (*date2* in hledger).
+
+*postdate* <string>
+	A metadata key that specifies metadata that should become the date of a posting (*date* in hledger).
+
 # FORMAT
 
 The configuration file uses YAML.
