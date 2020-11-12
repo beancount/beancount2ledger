@@ -21,8 +21,6 @@ class HLedgerPrinter(LedgerPrinter):
     "Multi-method for printing directives in HLedger format."
 
     def Transaction(self, entry):
-        strings = []
-
         # Insert a posting to absorb the residual if necessary. This is
         # sometimes needed because Ledger bases its balancing precision on the
         # *last* number of digits used on that currency. This is believed to be
@@ -31,14 +29,20 @@ class HLedgerPrinter(LedgerPrinter):
         entry = interpolate.fill_residual_posting(entry, ROUNDING_ACCOUNT)
 
         # Compute the string for the payee and narration line.
+        strings = []
         if entry.payee:
             strings.append(f"{ledger_str(entry.payee)} |")
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
-        flag = f"{ledger_flag(entry.flag)} " if ledger_flag(entry.flag) else ''
-        self.io.write('{e.date:%Y-%m-%d} {flag}{}\n'.format(
-            ' '.join(strings), flag=flag or '', e=entry))
+        self.io.write(f"{entry.date:%Y-%m-%d}")
+        flag = ledger_flag(entry.flag)
+        if flag:
+            self.io.write(' ' + flag)
+        payee = ' '.join(strings)
+        if payee:
+            self.io.write(' ' + payee)
+        self.io.write('\n')
 
         if entry.tags:
             self.io.write('  ; {}:\n'.format(':, '.join(sorted(entry.tags))))
