@@ -11,8 +11,10 @@ __license__ = "GPL-2.0-or-later"
 import datetime
 
 from beancount.core.amount import Amount
+from beancount.core import amount
 from beancount.core import position
 from beancount.core import interpolate
+from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, user_meta
@@ -30,7 +32,6 @@ class HLedgerPrinter(LedgerPrinter):
         if val is None:
             return f"{key}:"
         return f"{key}: {val}"
-
 
     def Transaction(self, entry):
         # Insert a posting to absorb the residual if necessary. This is
@@ -89,13 +90,24 @@ class HLedgerPrinter(LedgerPrinter):
             posting.flag) else ''
         flag_posting = f"{flag}{posting.account}"
 
-        pos_str = (position.to_string(posting, self.dformat, detail=False)
-                   if isinstance(posting.units, Amount) else '')
-        if pos_str:
-            # Convert the cost as a price entry, that's what HLedger appears to want.
-            pos_str = pos_str.replace('{', '@ ').replace('}', '')
+        pos_str = ''
+        # We don't use position.to_string() because that uses the same
+        # dformat for amount and cost, but we want dformat from our
+        # dcontext to format amounts to the right precision while
+        # retaining the full rpecision for costs.
+        if isinstance(posting.units, Amount):
+            pos_str = posting.units.to_string(self.dformat)
+            # Don't create a posting if the amount (rounded to the display
+            # precision) is 0.00.
+            amt = amount.from_string(pos_str)
+            if not amt:
+                return
+        # Convert the cost as a price entry, that's what HLedger appears to want.
+        if isinstance(posting.cost, position.Cost):
+            pos_str += ' @ ' + position.cost_to_str(
+                posting.cost, display_context.DEFAULT_FORMATTER, detail=False)
 
-        price_str = ('@ {}'.format(posting.price.to_string(self.dformat_max))
+        price_str = ('@ {}'.format(posting.price.to_string())
                      if posting.price is not None and posting.cost is None else
                      '')
         if posting.meta and '__automatic__' in posting.meta and not '__residual__' in posting.meta:

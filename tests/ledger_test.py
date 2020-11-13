@@ -217,7 +217,6 @@ class TestLedgerConversion(test_utils.TestCase):
             Assets:CA:Investment:HOOL           5 HOOL {520.0 USD} @ 520.0 USD
             Expenses:Commissions             9.95 USD
             Assets:CA:Investment:Cash    -2939.46 CAD @ 0.8879 USD
-            Equity:Rounding             -0.003466 USD
 
           P 2014-11-02 HOOL    520.0 USD
 
@@ -700,6 +699,85 @@ class TestLedgerConversion(test_utils.TestCase):
             2020-11-12=2020-11-03 * (1234) Code and aux-date
                 Assets:Test                                                   10.00 EUR
                 Equity:Opening-Balance
+        """, result)
+
+    @loader.load_doc()
+    def test_retain_precision(self, entries, _, ___):
+        """
+            2010-01-01 open Expenses:Nutrition:Food
+            2010-01-01 open Assets:Bank
+            2010-01-01 open Assets:Investments
+
+            2020-01-10 * "Supermarket"
+              Expenses:Nutrition:Food  150.75 THB @ 0.03310116086236 USD
+              Assets:Bank                                      -4.99 USD
+
+            2020-01-10 * "Supermarket"
+              Expenses:Nutrition:Food  150.75 THB @ 0.025207296849 GBP
+              Assets:Bank                                    -3.80 GBP
+
+            2020-02-28 * "Bought GB00BPN5P782"
+              Assets:Investments           1 GB00BPN5P782 {101.689996215 GBP}
+              Assets:Investments                                 -101.69 GBP
+        """
+        result = beancount2ledger.convert(entries, "ledger")
+        self.assertLines(r"""
+            account Expenses:Nutrition:Food
+
+            account Assets:Bank
+
+            account Assets:Investments
+
+            2020-01-10 * Supermarket
+              Expenses:Nutrition:Food                                        150.75 THB @ 0.03310116086236 USD
+              Assets:Bank                                                     -4.99 USD
+
+            2020-01-10 * Supermarket
+              Expenses:Nutrition:Food                                        150.75 THB @ 0.025207296849 GBP
+              Assets:Bank                                                     -3.80 GBP
+
+            2020-02-28 * Bought GB00BPN5P782
+              Assets:Investments                   1 "GB00BPN5P782" {101.689996215 GBP}
+              Assets:Investments                                            -101.69 GBP
+        """, result)
+
+    @loader.load_doc()
+    def test_rounding(self, entries, _, ___):
+        """
+            2010-01-01 open Expenses:Test
+            2010-01-01 open Assets:Bank
+
+            2020-01-10 * "Test"
+              Expenses:Test                           4.990 USD
+              Assets:Bank                            -4.990 USD
+
+            2020-01-10 * "Test: will fail in ledger due to precision of USD"
+              Expenses:Test            150.75 THB @ 0.03344 USD
+              Assets:Bank                             -5.04 USD
+
+            2020-01-10 * "Test: will fail in ledger due to precision of USD"
+              Expenses:Test               140.1 THB @ 0.021 USD
+              Assets:Bank                             -2.94 USD
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(r"""
+            account Expenses:Test
+
+            account Assets:Bank
+
+            2020-01-10 * Test
+              Expenses:Test                                                    4.990 USD
+              Assets:Bank                                                     -4.990 USD
+
+            2020-01-10 * Test: will fail in ledger due to precision of USD
+              Expenses:Test                                                   150.75 THB @ 0.03344 USD
+              Assets:Bank                                                     -5.040 USD
+              Equity:Rounding                                                 -0.001 USD
+
+            2020-01-10 * Test: will fail in ledger due to precision of USD
+              Expenses:Test                                                   140.10 THB @ 0.021 USD
+              Assets:Bank                                                     -2.940 USD
+              Equity:Rounding                                                 -0.002 USD
         """, result)
 
     def test_example(self):

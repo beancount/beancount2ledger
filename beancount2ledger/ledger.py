@@ -35,8 +35,6 @@ class LedgerPrinter:
         self.dcontext = dcontext or display_context.DEFAULT_DISPLAY_CONTEXT
         self.dformat = self.dcontext.build(
             precision=display_context.Precision.MOST_COMMON)
-        self.dformat_max = self.dcontext.build(
-            precision=display_context.Precision.MAXIMUM)
         self.config = set_default(config)
 
     def __call__(self, obj):
@@ -136,11 +134,25 @@ class LedgerPrinter:
             posting.flag) else ''
         flag_posting = f"{flag}{posting.account}"
 
+        pos_str = ''
+        # We don't use position.to_string() because that uses the same
+        # dformat for amount and cost, but we want dformat from our
+        # dcontext to format amounts to the right precision while
+        # retaining the full rpecision for costs.
+        if isinstance(posting.units, Amount):
+            pos_str = posting.units.to_string(self.dformat)
+            # Don't create a posting if the amount (rounded to the display
+            # precision) is 0.00.
+            amt = amount.from_string(pos_str)
+            if not amt:
+                return
         # We can't use default=True, even though we're interested in the
         # cost details, but we have to add them ourselves in the format
         # expected by ledger.
-        pos_str = (position.to_string(posting, self.dformat, detail=False)
-                   if isinstance(posting.units, Amount) else '')
+        if isinstance(posting.cost, position.Cost):
+            pos_str += ' {' + position.cost_to_str(
+                posting.cost, display_context.DEFAULT_FORMATTER,
+                detail=False) + '}'
         if posting.cost:
             if posting.cost.date != entry.date:
                 pos_str += f" [{posting.cost.date}]"
@@ -148,8 +160,7 @@ class LedgerPrinter:
                 pos_str += f" ({posting.cost.label})"
 
         if posting.price is not None:
-            price_str = '@ {}'.format(
-                posting.price.to_string(self.dformat_max))
+            price_str = '@ {}'.format(posting.price.to_string())
         else:
             # Figure out if we need to insert a price on a posting held at cost.
             # See https://groups.google.com/d/msg/ledger-cli/35hA0Dvhom0/WX8gY_5kHy0J
@@ -159,8 +170,7 @@ class LedgerPrinter:
             cost = posting.cost
             if postings_at_price and postings_at_cost and cost:
                 price_str = '@ {}'.format(
-                    amount.Amount(cost.number,
-                                  cost.currency).to_string(self.dformat))
+                    amount.Amount(cost.number, cost.currency).to_string())
             else:
                 price_str = ''
 

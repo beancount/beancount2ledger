@@ -2,6 +2,7 @@
 
 ## 1.3 (unreleased)
 
+* Add rounding postings only when required ([issue #9](https://github.com/beancount/beancount2ledger/issues/9))
 * Add config option `indent`
 * Show metadata with hledger output
 * Support setting auxiliary dates and posting dates from metadata ([issue #14](https://github.com/beancount/beancount2ledger/issues/14))
