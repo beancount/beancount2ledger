@@ -1,5 +1,9 @@
 # Beancount2ledger releases
 
+## 1.4 (unreleased)
+
+* Add support for reading from stdin ([issue #13](https://github.com/beancount/beancount2ledger/issues/13))
+
 ## 1.3 (2020-11-13)
 
 * Add rounding postings only when required ([issue #9](https://github.com/beancount/beancount2ledger/issues/9))
