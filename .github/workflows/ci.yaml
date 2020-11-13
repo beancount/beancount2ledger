@@ -30,3 +30,11 @@ jobs:
         run: brew install ledger
       - run: pip install -r requirements.txt
       - run: python -m pytest
+docs:
+  name: Documentation
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - run: pip install -r requirements_dev.txt
+    - run: mkdocs build
