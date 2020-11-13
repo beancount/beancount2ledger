@@ -31,6 +31,7 @@ jobs:
       - run: pip install -r requirements.txt -r requirements_dev.txt
       - run: python -m pytest
       - run: black --check .
+      - run: flake8 .
   docs:
     name: Documentation
     runs-on: ubuntu-latest
