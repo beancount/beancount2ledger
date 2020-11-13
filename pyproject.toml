@@ -5,3 +5,8 @@ requires = [
   "setuptools_scm",
 ]
 build-backend = "setuptools.build_meta"
+
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
