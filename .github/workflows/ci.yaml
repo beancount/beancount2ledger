@@ -28,7 +28,7 @@ jobs:
         run: sudo apt install ledger
       - if: matrix.os == 'macos-latest'
         run: brew install ledger
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements_dev.txt
       - run: python -m pytest
   docs:
     name: Documentation
