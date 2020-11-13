@@ -34,7 +34,7 @@ def get_config(user_config):
     all_config.append(xdg / "beancount2ledger" / "config.yaml")
     for config in all_config:
         if config.exists():
-            with open(config, 'r') as config_stream:
+            with open(config, "r") as config_stream:
                 return yaml.safe_load(config_stream)
     return {}
 
@@ -51,25 +51,24 @@ def cli():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '-f',
+        "-f",
         "--format",
         dest="format",
         action="store",
         choices=("ledger", "hledger"),
         default=default,
-        help=f"output format (default: {default})")
+        help=f"output format (default: {default})",
+    )
+    parser.add_argument("file", help="beancount file", type=str)
     parser.add_argument(
-        'file', help='beancount file', type=str)
+        "-c", "--config", help="config file", type=argparse.FileType("r")
+    )
     parser.add_argument(
-        '-c',
-        '--config',
-        help='config file',
-        type=argparse.FileType('r'))
-    parser.add_argument(
-        '-V',
+        "-V",
         "--version",
         action="version",
-        version=f"%(prog)s {beancount2ledger.__version__}")
+        version=f"%(prog)s {beancount2ledger.__version__}",
+    )
 
     with contextlib.ExitStack() as stack:
         args = parser.parse_args()
@@ -79,9 +78,12 @@ def cli():
         # stdin we write its content to a tempfile and call the loader on its path
         if in_file == "-":
             tmpfile = stack.enter_context(
-                NamedTemporaryFile(prefix="tmp.beancount2ledger.",
-                                   mode="w",
-                                   encoding=locale.getpreferredencoding()))
+                NamedTemporaryFile(
+                    prefix="tmp.beancount2ledger.",
+                    mode="w",
+                    encoding=locale.getpreferredencoding(),
+                )
+            )
             tmpfile.write(sys.stdin.read())
             tmpfile.flush()
             in_file = tmpfile.name

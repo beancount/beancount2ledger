@@ -83,15 +83,15 @@ class TestMappingConversion(test_utils.TestCase):
     @loader.load_doc()
     def test_posting(self, entries, _, __):
         """
-          2020-01-01 open Assets:Test
+        2020-01-01 open Assets:Test
 
-          2020-11-13 * "Test"
-            Assets:Test        1000.00 EUR
-            Assets:Test
+        2020-11-13 * "Test"
+          Assets:Test        1000.00 EUR
+          Assets:Test
 
-          2020-11-13 * "Test"
-            Assets:Test        1000.00 TEST
-            Assets:Test
+        2020-11-13 * "Test"
+          Assets:Test        1000.00 TEST
+          Assets:Test
         """
         result = beancount2ledger.convert(entries, config=self.config)
         self.assertLines(
@@ -105,4 +105,6 @@ class TestMappingConversion(test_utils.TestCase):
             2020-11-13 * Test
                 Assets:My Test                                                 1000.00 "TEST1"
                 Assets:My Test
-        """, result)
+        """,
+            result,
+        )

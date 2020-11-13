@@ -60,30 +60,28 @@ class HLedgerPrinter(LedgerPrinter):
             del meta[auxdate_key]
         flag = ledger_flag(entry.flag)
         if flag:
-            self.io.write(' ' + flag)
+            self.io.write(" " + flag)
         code_key = self.config.get("code")
         if code_key and not meta.get(code_key) is None:
             code = meta[code_key]
-            self.io.write(' (' + str(code) + ')')
+            self.io.write(" (" + str(code) + ")")
             del meta[code_key]
-        payee = ' '.join(strings)
+        payee = " ".join(strings)
         if payee:
-            self.io.write(' ' + payee)
-        self.io.write('\n')
+            self.io.write(" " + payee)
+        self.io.write("\n")
 
-        indent = ' ' * self.config["indent"]
+        indent = " " * self.config["indent"]
 
         if entry.tags:
-            self.io.write(indent +
-                          '; {}:\n'.format(':, '.join(sorted(entry.tags))))
+            self.io.write(indent + "; {}:\n".format(":, ".join(sorted(entry.tags))))
         if entry.links:
-            self.io.write(indent +
-                          '; Link: {}\n'.format(' '.join(sorted(entry.links))))
+            self.io.write(indent + "; Link: {}\n".format(" ".join(sorted(entry.links))))
 
         for key, val in meta.items():
             meta = self.format_meta(key, val)
             if meta:
-                self.io.write(indent + f'; {meta}\n')
+                self.io.write(indent + f"; {meta}\n")
 
         # If a posting without an amount is given and several amounts would
         # be added when balancing, beancount will create several postings.
@@ -102,11 +100,10 @@ class HLedgerPrinter(LedgerPrinter):
 
     def Posting(self, posting, entry):
         assert posting.account is not None
-        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(
-            posting.flag) else ''
+        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(posting.flag) else ""
         flag_posting = f"{flag}{posting.account}"
 
-        pos_str = ''
+        pos_str = ""
         # We don't use position.to_string() because that uses the same
         # dformat for amount and cost, but we want dformat from our
         # dcontext to format amounts to the right precision while
@@ -115,23 +112,30 @@ class HLedgerPrinter(LedgerPrinter):
             pos_str = posting.units.to_string(self.dformat)
         # Convert the cost as a price entry, that's what HLedger appears to want.
         if isinstance(posting.cost, position.Cost):
-            pos_str += ' @ ' + position.cost_to_str(
-                posting.cost, display_context.DEFAULT_FORMATTER, detail=False)
+            pos_str += " @ " + position.cost_to_str(
+                posting.cost, display_context.DEFAULT_FORMATTER, detail=False
+            )
 
-        price_str = ('@ {}'.format(posting.price.to_string())
-                     if posting.price is not None and posting.cost is None else
-                     '')
-        if posting.meta and '__automatic__' in posting.meta and not '__residual__' in posting.meta:
-            posting_str = f'{flag_posting}'
+        price_str = (
+            "@ {}".format(posting.price.to_string())
+            if posting.price is not None and posting.cost is None
+            else ""
+        )
+        if (
+            posting.meta
+            and "__automatic__" in posting.meta
+            and not "__residual__" in posting.meta
+        ):
+            posting_str = f"{flag_posting}"
         else:
             # Width we have available for the amount: take width of
             # flag_posting add config["indent"] for the indentation
             # of postings and add 2 to separate account from amount
             len_amount = max(0, 76 - (len(flag_posting) + 2 + 2))
-            posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
-        indent = ' ' * self.config["indent"]
+            posting_str = f"{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}"
+        indent = " " * self.config["indent"]
         self.io.write(indent + posting_str.rstrip())
-        self.io.write('\n')
+        self.io.write("\n")
 
         meta = user_meta(posting.meta or {})
         postdate_key = self.config.get("postdate")
@@ -148,4 +152,4 @@ class HLedgerPrinter(LedgerPrinter):
         for key, val in meta.items():
             formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(2 * indent + f'; {formatted_meta}\n')
+                self.io.write(2 * indent + f"; {formatted_meta}\n")

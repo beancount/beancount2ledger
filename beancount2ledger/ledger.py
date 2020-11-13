@@ -22,7 +22,12 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, postings_by_type, user_meta
-from .common import set_default, get_lineno, is_automatic_posting, filter_rounding_postings
+from .common import (
+    set_default,
+    get_lineno,
+    is_automatic_posting,
+    filter_rounding_postings,
+)
 
 
 class LedgerPrinter:
@@ -34,7 +39,8 @@ class LedgerPrinter:
         self.io = None
         self.dcontext = dcontext or display_context.DEFAULT_DISPLAY_CONTEXT
         self.dformat = self.dcontext.build(
-            precision=display_context.Precision.MOST_COMMON)
+            precision=display_context.Precision.MOST_COMMON
+        )
         self.config = set_default(config)
 
     def __call__(self, obj):
@@ -43,7 +49,6 @@ class LedgerPrinter:
         method(obj)
         return self.io.getvalue()
 
-
     def format_meta(self, key, val):
         """
         Format metadata
@@ -51,18 +56,18 @@ class LedgerPrinter:
 
         # See write_metadata() in beancount/parser/printer.py for allowed types
         if isinstance(val, str):
-            sep = ':'
+            sep = ":"
             val = ledger_str(val)
         elif isinstance(val, Decimal):
-            sep = '::'
+            sep = "::"
         elif isinstance(val, Amount):
-            sep = '::'
+            sep = "::"
         elif isinstance(val, datetime.date):
-            sep = '::'
+            sep = "::"
             val = f"[{val}]"
         elif isinstance(val, bool):
-            sep = '::'
-            val = 'true' if val else 'false'
+            sep = "::"
+            val = "true" if val else "false"
         elif isinstance(val, (dict, Inventory)):
             # Ignore dicts, don't print them out (according to printer.py)
             return
@@ -71,7 +76,6 @@ class LedgerPrinter:
         else:
             raise ValueError(f"Unexpected metadata type: {type(val)}")
         return f"{key}{sep} {val}"
-
 
     def Transaction(self, entry):
         """Transactions"""
@@ -101,30 +105,30 @@ class LedgerPrinter:
             del meta[auxdate_key]
         flag = ledger_flag(entry.flag)
         if flag:
-            self.io.write(' ' + flag)
+            self.io.write(" " + flag)
         code_key = self.config.get("code")
         if code_key and not meta.get(code_key) is None:
             code = meta[code_key]
-            self.io.write(' (' + str(code) + ')')
+            self.io.write(" (" + str(code) + ")")
             del meta[code_key]
-        payee = ' '.join(strings)
+        payee = " ".join(strings)
         if payee:
-            self.io.write(' ' + payee)
-        self.io.write('\n')
+            self.io.write(" " + payee)
+        self.io.write("\n")
 
-        indent = ' ' * self.config["indent"]
+        indent = " " * self.config["indent"]
 
         if entry.tags:
-            self.io.write(indent +
-                          '; :{}:\n'.format(':'.join(sorted(entry.tags))))
+            self.io.write(indent + "; :{}:\n".format(":".join(sorted(entry.tags))))
         if entry.links:
             self.io.write(
-                indent + '; Link: {}\n'.format(', '.join(sorted(entry.links))))
+                indent + "; Link: {}\n".format(", ".join(sorted(entry.links)))
+            )
 
         for key, val in meta.items():
             formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(indent + f'; {formatted_meta}\n')
+                self.io.write(indent + f"; {formatted_meta}\n")
 
         # If a posting without an amount is given and several amounts would
         # be added when balancing, beancount will create several postings.
@@ -145,11 +149,10 @@ class LedgerPrinter:
         """Postings"""
 
         assert posting.account is not None
-        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(
-            posting.flag) else ''
+        flag = f"{ledger_flag(posting.flag)} " if ledger_flag(posting.flag) else ""
         flag_posting = f"{flag}{posting.account}"
 
-        pos_str = ''
+        pos_str = ""
         # We don't use position.to_string() because that uses the same
         # dformat for amount and cost, but we want dformat from our
         # dcontext to format amounts to the right precision while
@@ -160,9 +163,13 @@ class LedgerPrinter:
         # cost details, but we have to add them ourselves in the format
         # expected by ledger.
         if isinstance(posting.cost, position.Cost):
-            pos_str += ' {' + position.cost_to_str(
-                posting.cost, display_context.DEFAULT_FORMATTER,
-                detail=False) + '}'
+            pos_str += (
+                " {"
+                + position.cost_to_str(
+                    posting.cost, display_context.DEFAULT_FORMATTER, detail=False
+                )
+                + "}"
+            )
         if posting.cost:
             if posting.cost.date != entry.date:
                 pos_str += f" [{posting.cost.date}]"
@@ -170,33 +177,34 @@ class LedgerPrinter:
                 pos_str += f" ({posting.cost.label})"
 
         if posting.price is not None:
-            price_str = '@ {}'.format(posting.price.to_string())
+            price_str = "@ {}".format(posting.price.to_string())
         else:
             # Figure out if we need to insert a price on a posting held at cost.
             # See https://groups.google.com/d/msg/ledger-cli/35hA0Dvhom0/WX8gY_5kHy0J
             # and https://github.com/ledger/ledger/issues/630
             (postings_simple, _, __) = postings_by_type(entry)
             postings_no_amount = [
-                posting for posting in postings_simple
+                posting
+                for posting in postings_simple
                 if posting.units is None or is_automatic_posting(posting)
             ]
             cost = posting.cost
             if cost and not postings_no_amount and len(entry.postings) > 2:
-                price_str = '@ {}'.format(
-                    amount.Amount(cost.number, cost.currency).to_string())
+                price_str = "@ {}".format(
+                    amount.Amount(cost.number, cost.currency).to_string()
+                )
             else:
-                price_str = ''
+                price_str = ""
 
         if is_automatic_posting(posting):
-            posting_str = f'{flag_posting}'
+            posting_str = f"{flag_posting}"
         else:
             # Width we have available for the amount: take width of
             # flag_posting add config["indent"] for the indentation
             # of postings and add 2 to separate account from amount
-            len_amount = max(
-                0, 75 - (len(flag_posting) + self.config["indent"] + 2))
-            posting_str = f'{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}'
-        indent = ' ' * self.config["indent"]
+            len_amount = max(0, 75 - (len(flag_posting) + self.config["indent"] + 2))
+            posting_str = f"{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}"
+        indent = " " * self.config["indent"]
         self.io.write(indent + posting_str.rstrip())
         meta = user_meta(posting.meta or {})
         dates = []
@@ -206,16 +214,16 @@ class LedgerPrinter:
             del meta[postdate_key]
         auxdate_key = self.config.get("auxdate")
         if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
-            dates.append('=' + str(meta[auxdate_key]))
+            dates.append("=" + str(meta[auxdate_key]))
             del meta[auxdate_key]
         if dates:
-            self.io.write('  ; [' + ''.join(dates) + ']')
-        self.io.write('\n')
+            self.io.write("  ; [" + "".join(dates) + "]")
+        self.io.write("\n")
 
         for key, val in meta.items():
             formatted_meta = self.format_meta(key, val)
             if meta:
-                self.io.write(2 * indent + f'; {formatted_meta}\n')
+                self.io.write(2 * indent + f"; {formatted_meta}\n")
 
     def Balance(self, entry):
         """Balance entries"""
@@ -229,15 +237,15 @@ class LedgerPrinter:
         """Note entries"""
 
         self.io.write(
-            ';; Note: {e.date:%Y-%m-%d} {e.account} {e.comment}\n'.format(
-                e=entry))
+            ";; Note: {e.date:%Y-%m-%d} {e.account} {e.comment}\n".format(e=entry)
+        )
 
     def Document(self, entry):
         """Document entries"""
 
         self.io.write(
-            ';; Document: {e.date:%Y-%m-%d} {e.account} {e.filename}\n'.format(
-                e=entry))
+            ";; Document: {e.date:%Y-%m-%d} {e.account} {e.filename}\n".format(e=entry)
+        )
 
     def Pad(self, entry):
         """Pad entries"""
@@ -247,49 +255,58 @@ class LedgerPrinter:
         # automatically, thus balancing the accounts. Ledger does not support
         # automatically padding, so we can just output this as a comment.
         self.io.write(
-            ';; Pad: {e.date:%Y-%m-%d} {e.account} {e.source_account}\n'.
-            format(e=entry))
+            ";; Pad: {e.date:%Y-%m-%d} {e.account} {e.source_account}\n".format(e=entry)
+        )
 
     def Commodity(self, entry):
         "Commodity declarations" ""
 
         # No need for declaration.
-        self.io.write('commodity {e.currency}\n'.format(e=entry))
+        self.io.write("commodity {e.currency}\n".format(e=entry))
 
     def Open(self, entry):
         """Account open statements"""
 
-        self.io.write('account {e.account}\n'.format(e=entry))
+        self.io.write("account {e.account}\n".format(e=entry))
         if entry.currencies:
-            self.io.write('  assert {}\n'.format(' | '.join(
-                'commodity == "{}"'.format(currency)
-                for currency in entry.currencies)))
+            self.io.write(
+                "  assert {}\n".format(
+                    " | ".join(
+                        'commodity == "{}"'.format(currency)
+                        for currency in entry.currencies
+                    )
+                )
+            )
 
     def Close(self, entry):
         """Account close statements"""
 
-        self.io.write(
-            ';; Close: {e.date:%Y-%m-%d} close {e.account}\n'.format(e=entry))
+        self.io.write(";; Close: {e.date:%Y-%m-%d} close {e.account}\n".format(e=entry))
 
     def Price(self, entry):
         """Price entries"""
 
-        self.io.write('P {:%Y-%m-%d} {:<26} {:>35}\n'.format(
-            entry.date, quote_currency(entry.currency), str(entry.amount)))
+        self.io.write(
+            "P {:%Y-%m-%d} {:<26} {:>35}\n".format(
+                entry.date, quote_currency(entry.currency), str(entry.amount)
+            )
+        )
 
     def Event(self, entry):
         """ Event entries"""
 
         self.io.write(
-            ';; Event: {e.date:%Y-%m-%d} "{e.type}" "{e.description}"\n'.
-            format(e=entry))
+            ';; Event: {e.date:%Y-%m-%d} "{e.type}" "{e.description}"\n'.format(e=entry)
+        )
 
     def Query(self, entry):
         """Query entries"""
 
         self.io.write(
-            ';; Query: {e.date:%Y-%m-%d} "{e.name}" "{e.query_string}"\n'.
-            format(e=entry))
+            ';; Query: {e.date:%Y-%m-%d} "{e.name}" "{e.query_string}"\n'.format(
+                e=entry
+            )
+        )
 
     def Custom(self, entry):
         """Custom entries"""
