@@ -18,6 +18,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, user_meta
+from .common import get_lineno
 from .ledger import LedgerPrinter
 
 
@@ -81,7 +82,19 @@ class HLedgerPrinter(LedgerPrinter):
             if meta:
                 self.io.write(indent + f'; {meta}\n')
 
-        for posting in entry.postings:
+        # If a posting without an amount is given and several amounts would
+        # be added when balancing, beancount will create several postings.
+        # But we ignore the amount on those postings (since they were added
+        # by beancount and not the user), which means we may end up with
+        # two or more postings with no amount, which is not valid.
+        # Therefore, only take *one* posting by looking at the line number.
+        seen = set()
+        for posting in sorted(entry.postings, key=lambda p: get_lineno(p)):
+            lineno = get_lineno(posting)
+            if lineno is not None:
+                if lineno in seen:
+                    continue
+                seen.add(lineno)
             self.Posting(posting, entry)
 
     def Posting(self, posting, entry):

@@ -9,6 +9,7 @@ Common functions
 __license__ = "GPL-2.0-or-later"
 
 import re
+import sys
 
 from beancount.core import data
 from beancount.core import convert
@@ -169,3 +170,12 @@ def user_meta(meta):
         'lineno',
     ]
     return {key: meta[key] for key in meta if key not in ignore}
+
+
+def get_lineno(posting):
+    """
+    Get line number of posting
+    """
+
+    meta = posting.meta or {}
+    return meta.get("lineno", sys.maxsize)

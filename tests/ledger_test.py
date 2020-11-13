@@ -817,6 +817,29 @@ class TestLedgerConversion(test_utils.TestCase):
               Equity:Opening-Balance
         """, result)
 
+    @loader.load_doc()
+    def test_avoid_multiple_null_postings(self, entries, _, ___):
+        """
+            2010-01-01 open Assets:Cash
+            2010-01-01 open Equity:Opening-balance
+
+            2020-01-01 * "Opening balance: cash"
+              Assets:Cash                                               0.10 EUR
+              Assets:Cash                                               1.00 GBP
+              Equity:Opening-balance
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(r"""
+            account Assets:Cash
+
+            account Equity:Opening-balance
+
+            2020-01-01 * Opening balance: cash
+              Assets:Cash                                                       0.10 EUR
+              Assets:Cash                                                       1.00 GBP
+              Equity:Opening-balance
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',
