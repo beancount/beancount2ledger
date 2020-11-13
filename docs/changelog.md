@@ -1,6 +1,6 @@
 # Beancount2ledger releases
 
-## 1.3 (unreleased)
+## 1.3 (2020-11-13)
 
 * Add rounding postings only when required ([issue #9](https://github.com/beancount/beancount2ledger/issues/9))
 * Avoid printing too much precision for a currency ([issue #21](https://github.com/beancount/beancount2ledger/issues/21))
