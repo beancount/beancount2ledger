@@ -179,3 +179,34 @@ def get_lineno(posting):
 
     meta = posting.meta or {}
     return meta.get("lineno", sys.maxsize)
+
+
+def is_automatic_posting(posting):
+    """
+    Is posting an automatic posting added by beancount?
+    """
+
+    if not posting.meta:
+        return False
+    if '__automatic__' in posting.meta and not '__residual__' in posting.meta:
+        return True
+    return False
+
+
+def filter_display_postings(entry, dformat):
+    """
+    Return entry without postings that wouldn't be displayed because
+    the display precision rounds them to 0.00.
+    """
+
+    postings = list(entry.postings)
+    new_postings = []
+    for posting in postings:
+        pos_str = posting.units.to_string(dformat)
+        # Don't create a posting if the amount (rounded to the display
+        # precision) is 0.00.
+        amt = amount.from_string(pos_str)
+        if amt:
+            new_postings.append(posting)
+    entry = entry._replace(postings=new_postings)
+    return entry

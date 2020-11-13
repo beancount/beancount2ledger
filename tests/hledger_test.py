@@ -534,6 +534,29 @@ class TestHLedgerConversion(test_utils.TestCase):
               Equity:Opening-balance
         """, result)
 
+    @loader.load_doc()
+    def test_add_price_when_needed(self, entries, _, ___):
+        """
+            2020-01-01 open Assets:Property
+            2020-01-01 open Equity:Opening-Balance
+
+            2020-11-13 * "Cost without price"
+                Assets:Property                   0.1 FOO {300.00 EUR}
+                Assets:Property                   0.2 BAR {200.00 EUR}
+                Equity:Opening-Balance         -70.00 EUR
+        """
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines(r"""
+            account Assets:Property
+
+            account Equity:Opening-Balance
+
+            2020-11-13 * Cost without price
+              Assets:Property                                      0.1 FOO @ 300.00 EUR
+              Assets:Property                                      0.2 BAR @ 200.00 EUR
+              Equity:Opening-Balance                                         -70.00 EUR
+        """, result)
+
     def test_example(self):
         """
         Test converted example with hledger

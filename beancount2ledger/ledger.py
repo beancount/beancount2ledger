@@ -22,7 +22,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, postings_by_type, user_meta
-from .common import set_default, get_lineno
+from .common import set_default, get_lineno, is_automatic_posting, filter_display_postings
 
 
 class LedgerPrinter:
@@ -82,6 +82,9 @@ class LedgerPrinter:
         # a bug, so instead, we simply insert a rounding account to absorb the
         # residual and precisely balance the transaction.
         entry = interpolate.fill_residual_posting(entry, ROUNDING_ACCOUNT)
+        # Remove postings which wouldn't be displayed (due to precision
+        # rounding amounts to 0.00)
+        entry = filter_display_postings(entry, self.dformat)
 
         # Compute the string for the payee and narration line.
         strings = []
@@ -150,14 +153,9 @@ class LedgerPrinter:
         # We don't use position.to_string() because that uses the same
         # dformat for amount and cost, but we want dformat from our
         # dcontext to format amounts to the right precision while
-        # retaining the full rpecision for costs.
+        # retaining the full precision for costs.
         if isinstance(posting.units, Amount):
             pos_str = posting.units.to_string(self.dformat)
-            # Don't create a posting if the amount (rounded to the display
-            # precision) is 0.00.
-            amt = amount.from_string(pos_str)
-            if not amt:
-                return
         # We can't use default=True, even though we're interested in the
         # cost details, but we have to add them ourselves in the format
         # expected by ledger.
@@ -176,17 +174,20 @@ class LedgerPrinter:
         else:
             # Figure out if we need to insert a price on a posting held at cost.
             # See https://groups.google.com/d/msg/ledger-cli/35hA0Dvhom0/WX8gY_5kHy0J
-            (postings_simple, postings_at_price,
-             postings_at_cost) = postings_by_type(entry)
-
+            # and https://github.com/ledger/ledger/issues/630
+            (postings_simple, _, __) = postings_by_type(entry)
+            postings_no_amount = [
+                posting for posting in postings_simple
+                if not posting.units or is_automatic_posting(posting)
+            ]
             cost = posting.cost
-            if postings_at_price and postings_at_cost and cost:
+            if cost and not postings_no_amount and len(entry.postings) > 2:
                 price_str = '@ {}'.format(
                     amount.Amount(cost.number, cost.currency).to_string())
             else:
                 price_str = ''
 
-        if posting.meta and '__automatic__' in posting.meta and not '__residual__' in posting.meta:
+        if is_automatic_posting(posting):
             posting_str = f'{flag_posting}'
         else:
             # Width we have available for the amount: take width of
