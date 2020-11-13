@@ -193,10 +193,10 @@ def is_automatic_posting(posting):
     return False
 
 
-def filter_display_postings(entry, dformat):
+def filter_rounding_postings(entry, dformat):
     """
-    Return entry without postings that wouldn't be displayed because
-    the display precision rounds them to 0.00.
+    Return entry without rounding postings that wouldn't be displayed
+    because the display precision rounds them to 0.00.
     """
 
     postings = list(entry.postings)
@@ -206,7 +206,7 @@ def filter_display_postings(entry, dformat):
         # Don't create a posting if the amount (rounded to the display
         # precision) is 0.00.
         amt = amount.from_string(pos_str)
-        if amt:
+        if amt or posting.account != ROUNDING_ACCOUNT:
             new_postings.append(posting)
     entry = entry._replace(postings=new_postings)
     return entry

@@ -32,7 +32,7 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
         dcontext = display_context.DisplayContext()
         for entry in filter_txns(entries):
             for posting in entry.postings:
-                if not posting.units:
+                if posting.units is None:
                     continue
                 if (posting.meta and '__automatic__' in posting.meta
                         and not '__residual__' in posting.meta):

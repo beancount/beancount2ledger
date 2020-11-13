@@ -18,7 +18,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, user_meta
-from .common import get_lineno
+from .common import get_lineno, filter_rounding_postings
 from .ledger import LedgerPrinter
 
 
@@ -41,6 +41,9 @@ class HLedgerPrinter(LedgerPrinter):
         # a bug, so instead, we simply insert a rounding account to absorb the
         # residual and precisely balance the transaction.
         entry = interpolate.fill_residual_posting(entry, ROUNDING_ACCOUNT)
+        # Remove postings which wouldn't be displayed (due to precision
+        # rounding amounts to 0.00)
+        entry = filter_rounding_postings(entry, self.dformat)
 
         # Compute the string for the payee and narration line.
         strings = []
@@ -110,11 +113,6 @@ class HLedgerPrinter(LedgerPrinter):
         # retaining the full rpecision for costs.
         if isinstance(posting.units, Amount):
             pos_str = posting.units.to_string(self.dformat)
-            # Don't create a posting if the amount (rounded to the display
-            # precision) is 0.00.
-            amt = amount.from_string(pos_str)
-            if not amt:
-                return
         # Convert the cost as a price entry, that's what HLedger appears to want.
         if isinstance(posting.cost, position.Cost):
             pos_str += ' @ ' + position.cost_to_str(

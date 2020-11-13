@@ -22,7 +22,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, postings_by_type, user_meta
-from .common import set_default, get_lineno, is_automatic_posting, filter_display_postings
+from .common import set_default, get_lineno, is_automatic_posting, filter_rounding_postings
 
 
 class LedgerPrinter:
@@ -84,7 +84,7 @@ class LedgerPrinter:
         entry = interpolate.fill_residual_posting(entry, ROUNDING_ACCOUNT)
         # Remove postings which wouldn't be displayed (due to precision
         # rounding amounts to 0.00)
-        entry = filter_display_postings(entry, self.dformat)
+        entry = filter_rounding_postings(entry, self.dformat)
 
         # Compute the string for the payee and narration line.
         strings = []
@@ -178,7 +178,7 @@ class LedgerPrinter:
             (postings_simple, _, __) = postings_by_type(entry)
             postings_no_amount = [
                 posting for posting in postings_simple
-                if not posting.units or is_automatic_posting(posting)
+                if posting.units is None or is_automatic_posting(posting)
             ]
             cost = posting.cost
             if cost and not postings_no_amount and len(entry.postings) > 2:

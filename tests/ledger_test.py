@@ -863,6 +863,29 @@ class TestLedgerConversion(test_utils.TestCase):
               Equity:Opening-Balance                                         -70.00 EUR
         """, result)
 
+    @loader.load_doc()
+    def test_keep_zero_amounts(self, entries, _, ___):
+        """
+            2010-01-01 open Assets:Investments
+            2010-01-01 open Expenses:Fees:Investments
+
+            2020-05-24 * "Bought ETH"
+              Assets:Investments                     0.00000221 ETH {190.60 EUR}
+              Expenses:Fees:Investments                                 0.00 EUR
+              Assets:Investments                                       -0.00 EUR
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(r"""
+            account Assets:Investments
+
+            account Expenses:Fees:Investments
+
+            2020-05-24 * Bought ETH
+              Assets:Investments                            0.00000221 ETH {190.60 EUR} @ 190.60 EUR
+              Expenses:Fees:Investments                                        0.00 EUR
+              Assets:Investments                                               0.00 EUR
+        """, result)
+
     def test_example(self):
         with tempfile.NamedTemporaryFile('w',
                                          suffix='.beancount',
