@@ -117,7 +117,7 @@ class TestLedgerUtilityFunctionsOnPostings(cmptest.TestCase):
             Expenses:Commissions                 9.95 USD
             Assets:CA:Investment:Cash       -2,609.946534 USD
 
-        """,
+        """,  # NoQA: E501 line too long
             new_entries,
         )
 
@@ -199,7 +199,7 @@ class TestLedgerConversion(test_utils.TestCase):
             Expenses:Restaurant                                                     50.02 USD
             Assets:Cash
 
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -370,7 +370,7 @@ class TestLedgerConversion(test_utils.TestCase):
         2020-02-03 * "Super Shop"  "New computer"
           Expenses:Computers       1 COMPUTER {900.00 USD, 2019-12-25} @ 1100.00 USD
           Assets:Bank
-        """
+        """  # NoQA: E501 line too long
         result = beancount2ledger.convert(entries)
         self.assertLines(
             """
@@ -389,7 +389,7 @@ class TestLedgerConversion(test_utils.TestCase):
           2020-02-03 * Super Shop | New computer
             Expenses:Computers                      1 COMPUTER {900.00 USD} [2019-12-25] @ 1100.00 USD
             Assets:Bank
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -411,7 +411,7 @@ class TestLedgerConversion(test_utils.TestCase):
           Assets:Test                                                                         -1000.00 EUR
           * Assets:Test     100000.00 EUREUREUREUREUR
           Assets:Test      -100000.00 EUREUREUREUREUR
-        """
+        """  # NoQA: E501 line too long
         result = beancount2ledger.convert(entries)
         len_postings = [len(line) for line in result.rstrip().split("\n")]
         self.assertEqual(len_postings[-10:-1:2], [75, 75, 80, 98, 75])
@@ -603,7 +603,7 @@ class TestLedgerConversion(test_utils.TestCase):
               Equity:Opening-Balance                                         -10.00 EUR  ; [2020-11-03=2020-11-04]
                 ; test: foo
 
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -636,7 +636,7 @@ class TestLedgerConversion(test_utils.TestCase):
               Equity:Opening-Balance                                         -10.00 EUR  ; [=2020-11-04]
                 ; date:: [2020-11-03]
                 ; test: foo
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -792,7 +792,7 @@ class TestLedgerConversion(test_utils.TestCase):
             2020-02-28 * Bought GB00BPN5P782
               Assets:Investments                   1 "GB00BPN5P782" {101.689996215 GBP}
               Assets:Investments                                            -101.69 GBP
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -834,7 +834,7 @@ class TestLedgerConversion(test_utils.TestCase):
               Expenses:Test                                                   140.10 THB @ 0.021 USD
               Assets:Bank                                                     -2.940 USD
               Equity:Rounding                                                 -0.002 USD
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -926,7 +926,7 @@ class TestLedgerConversion(test_utils.TestCase):
               Assets:Property                                      0.1 FOO {300.00 EUR} @ 300.00 EUR
               Assets:Property                                      0.2 BAR {200.00 EUR} @ 200.00 EUR
               Equity:Opening-Balance                                         -70.00 EUR
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -952,7 +952,7 @@ class TestLedgerConversion(test_utils.TestCase):
               Assets:Investments                            0.00000221 ETH {190.60 EUR} @ 190.60 EUR
               Expenses:Fees:Investments                                        0.00 EUR
               Assets:Investments                                               0.00 EUR
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 

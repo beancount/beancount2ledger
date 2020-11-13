@@ -105,6 +105,6 @@ class TestMappingConversion(test_utils.TestCase):
             2020-11-13 * Test
                 Assets:My Test                                                 1000.00 "TEST1"
                 Assets:My Test
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )

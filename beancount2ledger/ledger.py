@@ -203,7 +203,10 @@ class LedgerPrinter:
             # flag_posting add config["indent"] for the indentation
             # of postings and add 2 to separate account from amount
             len_amount = max(0, 75 - (len(flag_posting) + self.config["indent"] + 2))
-            posting_str = f"{flag_posting}  {quote_currency(pos_str):>{len_amount}} {quote_currency(price_str)}"
+            posting_str = (
+                f"{flag_posting}  {quote_currency(pos_str):>{len_amount}}"
+                f" {quote_currency(price_str)}"
+            )
         indent = " " * self.config["indent"]
         self.io.write(indent + posting_str.rstrip())
         meta = user_meta(posting.meta or {})

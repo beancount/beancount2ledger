@@ -74,7 +74,8 @@ def postings_by_type(entry):
     Args:
       entry: An instance of Transaction.
     Returns:
-      A tuple of simple postings, postings with price conversions, postings held at cost.
+      A tuple of simple postings, postings with price conversions, postings held at
+      cost.
     """
     postings_at_cost = []
     postings_at_price = []
