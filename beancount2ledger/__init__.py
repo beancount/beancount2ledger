@@ -35,8 +35,11 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
             for posting in entry.postings:
                 if posting.units is None:
                     continue
-                if (posting.meta and '__automatic__' in posting.meta
-                        and not '__residual__' in posting.meta):
+                if (
+                    posting.meta
+                    and "__automatic__" in posting.meta
+                    and not "__residual__" in posting.meta
+                ):
                     continue
                 dcontext.update(posting.units.number, posting.units.currency)
 
@@ -44,7 +47,7 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
         printer = HLedgerPrinter(dcontext=dcontext, config=config)
     else:
         printer = LedgerPrinter(dcontext=dcontext, config=config)
-    return '\n'.join(map_data(printer(entry), config) for entry in entries)
+    return "\n".join(map_data(printer(entry), config) for entry in entries)
 
 
 def convert_file(file, output_format="ledger", dcontext=None, config={}):

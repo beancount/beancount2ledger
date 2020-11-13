@@ -15,7 +15,7 @@ from beancount.core import data
 from beancount.core import convert
 from beancount.core import amount
 
-ROUNDING_ACCOUNT = 'Equity:Rounding'
+ROUNDING_ACCOUNT = "Equity:Rounding"
 
 
 def ledger_flag(flag):
@@ -23,7 +23,7 @@ def ledger_flag(flag):
     Return the flag only if it's a valid flag in ledger
     """
 
-    if flag and flag in ('*', '!'):
+    if flag and flag in ("*", "!"):
         return flag
 
 
@@ -34,7 +34,7 @@ def ledger_str(text):
     Specifically, turn multi-line strings into a single line
     """
 
-    return text.replace('\n', '\\n')
+    return text.replace("\n", "\\n")
 
 
 def quote(currency):
@@ -42,7 +42,7 @@ def quote(currency):
     Add quotes around a currency string
     """
 
-    return f'"{currency}"' if re.search(r'[0-9\.-]', currency) else currency
+    return f'"{currency}"' if re.search(r"[0-9\.-]", currency) else currency
 
 
 def quote_match(match):
@@ -65,7 +65,7 @@ def quote_currency(string):
     Returns:
       A string of text, with the commodity expressions surrounded with quotes.
     """
-    return re.sub(r'\b({})\b'.format(amount.CURRENCY_RE), quote_match, string)
+    return re.sub(r"\b({})\b".format(amount.CURRENCY_RE), quote_match, string)
 
 
 def postings_by_type(entry):
@@ -123,8 +123,7 @@ def split_currency_conversions(entry):
     """
     assert isinstance(entry, data.Transaction)
 
-    (postings_simple, postings_at_price,
-     postings_at_cost) = postings_by_type(entry)
+    (postings_simple, postings_at_price, postings_at_cost) = postings_by_type(entry)
 
     converted = postings_at_cost and postings_at_price
     if converted:
@@ -133,20 +132,23 @@ def split_currency_conversions(entry):
         replacement_postings = []
         for posting_orig in postings_at_price:
             weight = convert.get_weight(posting_orig)
-            posting_pos = data.Posting(posting_orig.account, weight, None,
-                                       None, None, None)
-            posting_neg = data.Posting(posting_orig.account, -weight, None,
-                                       None, None, None)
+            posting_pos = data.Posting(
+                posting_orig.account, weight, None, None, None, None
+            )
+            posting_neg = data.Posting(
+                posting_orig.account, -weight, None, None, None, None
+            )
 
             currency_entry = entry._replace(
                 postings=[posting_orig, posting_neg],
-                narration=entry.narration + ' (Currency conversion)')
+                narration=entry.narration + " (Currency conversion)",
+            )
             new_entries.append(currency_entry)
             replacement_postings.append(posting_pos)
 
         converted_entry = entry._replace(
-            postings=(
-                postings_at_cost + postings_simple + replacement_postings))
+            postings=(postings_at_cost + postings_simple + replacement_postings)
+        )
         new_entries.append(converted_entry)
     else:
         new_entries = [entry]
@@ -170,11 +172,11 @@ def user_meta(meta):
     """
 
     ignore = [
-        '__tolerances__',
-        '__automatic__',
-        '__residual__',
-        'filename',
-        'lineno',
+        "__tolerances__",
+        "__automatic__",
+        "__residual__",
+        "filename",
+        "lineno",
     ]
     return {key: meta[key] for key in meta if key not in ignore}
 
@@ -195,7 +197,7 @@ def is_automatic_posting(posting):
 
     if not posting.meta:
         return False
-    if '__automatic__' in posting.meta and not '__residual__' in posting.meta:
+    if "__automatic__" in posting.meta and not "__residual__" in posting.meta:
         return True
     return False
 
@@ -231,7 +233,7 @@ def map_data(string, config):
         return string
 
     for account in account_map:
-         string = re.sub(rf'\b{account}(?=  |\t|$)', account_map[account], string)
+        string = re.sub(rf"\b{account}(?=  |\t|$)", account_map[account], string)
 
     def map_currency(match):
         currency = match.group(2)
