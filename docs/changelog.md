@@ -11,6 +11,7 @@
 * Show metadata with hledger output
 * Support setting auxiliary dates and posting dates from metadata ([issue #14](https://github.com/beancount/beancount2ledger/issues/14))
 * Support setting the code of transactions from metadata
+* Document limitations ([issue #12](https://github.com/beancount/beancount2ledger/issues/12))
 
 ## 1.2 (2020-07-25)
 

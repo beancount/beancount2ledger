@@ -20,6 +20,8 @@ nav:
           - Installation: install.md
           - Usage: usage.md
           - Configuration: configuration.md
+    - Guides:
+          - Limitations: limitations.md
     - About:
           - Release notes: changelog.md
           - Bugs and contributions: contributing.md
