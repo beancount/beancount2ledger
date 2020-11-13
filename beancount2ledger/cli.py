@@ -10,9 +10,12 @@ Beancount to Ledger converter
 __license__ = "GPL-2.0-or-later"
 
 import argparse
+import contextlib
+import locale
 from pathlib import Path
 import os
 import sys
+from tempfile import NamedTemporaryFile
 import yaml
 
 import beancount2ledger
@@ -56,7 +59,7 @@ def cli():
         default=default,
         help=f"output format (default: {default})")
     parser.add_argument(
-        'file', help='beancount file', type=argparse.FileType('r'))
+        'file', help='beancount file', type=str)
     parser.add_argument(
         '-c',
         '--config',
@@ -68,11 +71,24 @@ def cli():
         action="version",
         version=f"%(prog)s {beancount2ledger.__version__}")
 
-    args = parser.parse_args()
-    config = get_config(args.config)
-    output = beancount2ledger.convert_file(
-        args.file.name, args.format, config=config)
-    print(output)
+    with contextlib.ExitStack() as stack:
+        args = parser.parse_args()
+        in_file = args.file
+
+        # beancount loader does not accept file objects, hence to support reading from
+        # stdin we write its content to a tempfile and call the loader on its path
+        if in_file == "-":
+            tmpfile = stack.enter_context(
+                NamedTemporaryFile(prefix="tmp.beancount2ledger.",
+                                   mode="w",
+                                   encoding=locale.getpreferredencoding()))
+            tmpfile.write(sys.stdin.read())
+            tmpfile.flush()
+            in_file = tmpfile.name
+
+        config = get_config(args.config)
+        output = beancount2ledger.convert_file(in_file, args.format, config=config)
+        print(output)
 
 
 if __name__ == "__main__":
