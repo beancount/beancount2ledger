@@ -11,7 +11,6 @@ __license__ = "GPL-2.0-or-later"
 import datetime
 
 from beancount.core.amount import Amount
-from beancount.core import amount
 from beancount.core import position
 from beancount.core import interpolate
 from beancount.core import display_context
@@ -124,7 +123,7 @@ class HLedgerPrinter(LedgerPrinter):
         if (
             posting.meta
             and "__automatic__" in posting.meta
-            and not "__residual__" in posting.meta
+            and "__residual__" not in posting.meta
         ):
             posting_str = f"{flag_posting}"
         else:

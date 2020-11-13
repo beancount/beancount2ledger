@@ -161,7 +161,7 @@ def set_default(config):
     Set some defaults for the config
     """
 
-    if not "indent" in config:
+    if "indent" not in config:
         config["indent"] = 2
     return config
 
@@ -197,7 +197,7 @@ def is_automatic_posting(posting):
 
     if not posting.meta:
         return False
-    if "__automatic__" in posting.meta and not "__residual__" in posting.meta:
+    if "__automatic__" in posting.meta and "__residual__" not in posting.meta:
         return True
     return False
 
