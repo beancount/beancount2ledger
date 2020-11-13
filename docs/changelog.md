@@ -6,6 +6,7 @@
 * Avoid printing too much precision for a currency ([issue #21](https://github.com/beancount/beancount2ledger/issues/21))
 * Avoid creating two or more postings with null amount ([issue #23](https://github.com/beancount/beancount2ledger/issues/23))
 * Add price to cost when needed by ledger ([issue #22](https://github.com/beancount/beancount2ledger/issues/22))
+* Preserve posting order ([issue #18](https://github.com/beancount/beancount2ledger/issues/18))
 * Add config option `indent`
 * Show metadata with hledger output
 * Support setting auxiliary dates and posting dates from metadata ([issue #14](https://github.com/beancount/beancount2ledger/issues/14))

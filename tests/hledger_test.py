@@ -580,6 +580,31 @@ class TestHLedgerConversion(test_utils.TestCase):
               Assets:Investments                                               0.00 EUR
         """, result)
 
+    @loader.load_doc()
+    def test_preserve_posting_order(self, entries, _, ___):
+        """
+            2010-01-01 open Assets:Test
+
+            2020-07-24 * "Posting order"
+              Assets:Test        1000.00 EUR
+              Assets:Test       -1000.00 EUR
+              Assets:Test        1000.00 EUREUREUREUREUR
+              Assets:Test       -1000.00 EUREUREUREUREUR
+              Assets:Test        1000.00 EUR
+              Assets:Test       -1000.00 EUR
+        """
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines(r"""
+            account Assets:Test
+
+            2020-07-24 * Posting order
+              Assets:Test                                                    1000.00 EUR
+              Assets:Test                                                   -1000.00 EUR
+              Assets:Test                                        1000.00 EUREUREUREUREUR
+              Assets:Test                                       -1000.00 EUREUREUREUREUR
+              Assets:Test                                                    1000.00 EUR
+              Assets:Test                                                   -1000.00 EUR
+        """, result)
 
     def test_example(self):
         """
