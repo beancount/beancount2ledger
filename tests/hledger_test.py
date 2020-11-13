@@ -95,7 +95,7 @@ class TestHLedgerConversion(test_utils.TestCase):
           2020-01-01 * Grocery | Salad
             Expenses:Grocery                                                 5 SALAD @ 1.00 USD
             Assets:Bank
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -461,7 +461,7 @@ class TestHLedgerConversion(test_utils.TestCase):
             2020-02-28 * Bought GB00BPN5P782
               Assets:Investments                    1 "GB00BPN5P782" @ 101.689996215 GBP
               Assets:Investments                                             -101.69 GBP
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
@@ -503,7 +503,7 @@ class TestHLedgerConversion(test_utils.TestCase):
               Expenses:Test                                                   140.10 THB @ 0.021 USD
               Assets:Bank                                                     -2.940 USD
               Equity:Rounding                                                 -0.002 USD
-        """,
+        """,  # NoQA: E501 line too long
             result,
         )
 
