@@ -474,6 +474,43 @@ class TestHLedgerConversion(test_utils.TestCase):
               Equity:Rounding                                                 -0.002 USD
         """, result)
 
+    @loader.load_doc()
+    def test_avoid_too_much_precision(self, entries, _, ___):
+        """
+            2020-01-01 open Assets:Property
+            2020-01-01 open Equity:Opening-Balance
+
+            2020-10-23 * "Test of precision for EUR"
+                Assets:Property               0.11110000 FOO {300.00 EUR}
+                Equity:Opening-Balance                        -33.33 EUR
+
+            2020-10-23 * "Test of precision for EUR"
+                Assets:Property               0.11110000 FOO {300.00 EUR}
+                Equity:Opening-Balance
+
+            2020-10-23 * "Test of precision for EUR"
+                Assets:Property                   0.1111 FOO {300.00 EUR}
+                Equity:Opening-Balance
+        """
+        result = beancount2ledger.convert(entries, "hledger")
+        self.assertLines(r"""
+            account Assets:Property
+
+            account Equity:Opening-Balance
+
+            2020-10-23 * Test of precision for EUR
+              Assets:Property                                0.11110000 FOO @ 300.00 EUR
+              Equity:Opening-Balance                                          -33.33 EUR
+
+            2020-10-23 * Test of precision for EUR
+              Assets:Property                                0.11110000 FOO @ 300.00 EUR
+              Equity:Opening-Balance
+
+            2020-10-23 * Test of precision for EUR
+              Assets:Property                                0.11110000 FOO @ 300.00 EUR
+              Equity:Opening-Balance
+        """, result)
+
     def test_example(self):
         """
         Test converted example with hledger

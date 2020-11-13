@@ -34,6 +34,9 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
             for posting in entry.postings:
                 if not posting.units:
                     continue
+                if (posting.meta and '__automatic__' in posting.meta
+                        and not '__residual__' in posting.meta):
+                    continue
                 dcontext.update(posting.units.number, posting.units.currency)
 
     if output_format == "hledger":
