@@ -1,5 +1,18 @@
 # User guide
 
+## Accounts
+
+All account names from beancount are also valid in ledger.
+
+However, beancount2ledger allows you to map an account name from beancount to another account name in ledger (for example `Assets:My-Bank` to `Assets:My Bank`).  This might be useful since beancount is more restrictive regarding account names.
+
+If you want to map account names, add `account_map` to the config file:
+
+```yaml
+account_map:
+  Assets:My-Bank: Assets:My Bank
+```
+
 ## Auxiliary dates
 
 Beancount currently doesn't support ledger's [auxiliary dates](https://www.ledger-cli.org/3.0/doc/ledger3.html#Auxiliary-dates) (or effective dates; also known as [date2 in hledger](https://hledger.org/journal.html#secondary-dates)).
@@ -37,6 +50,17 @@ account Assets:Test
 Output for hledger (using the `-f` option) uses a `date2` tag for postings.
 
 Posting dates (`date` in hledger) are also supported using the `postdate` config variable.
+
+## Currencies
+
+All currencies from beancount are also valid in ledger, although some have to be quoted to be valid in ledger (`TEST1` becomes `"TEST1"`).  Beancount2ledger takes care of this automatically.
+
+If you want to map a beancount currency to another currency name in ledger, you can define `currency_map` in the config file.  For example:
+
+```yaml
+currency_map:
+  EUR: "€"
+```
 
 ## Links
 

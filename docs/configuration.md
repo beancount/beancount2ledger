@@ -10,9 +10,13 @@ It will search for a configuration file in the following order:
 
 ## Config options
 
+### General
+
 indent
 
 :   The number of spaces to indent postings (default: 2).
+
+### Information from metadata
 
 auxdate
 
@@ -24,3 +28,10 @@ postdate
 code
 :   A metadata key that specifies metadata that should become the code of a transaction.
 
+### Mappings
+
+account_map
+:   A mapping of beancount account names to ledger account names.
+
+currency_map
+:   A mapping of beancount currency names to ledger currency names.

@@ -37,7 +37,15 @@ def ledger_str(text):
     return text.replace('\n', '\\n')
 
 
-def quote(match):
+def quote(currency):
+    """
+    Add quotes around a currency string
+    """
+
+    return f'"{currency}"' if re.search(r'[0-9\.-]', currency) else currency
+
+
+def quote_match(match):
     """Add quotes around a re.MatchObject.
 
     Args:
@@ -46,8 +54,7 @@ def quote(match):
       A quoted string of the match contents.
     """
     currency = match.group(1)
-    return '"{}"'.format(currency) if re.search(r'[0-9\.-]',
-                                                currency) else currency
+    return quote(currency)
 
 
 def quote_currency(string):
@@ -58,7 +65,7 @@ def quote_currency(string):
     Returns:
       A string of text, with the commodity expressions surrounded with quotes.
     """
-    return re.sub(r'\b({})\b'.format(amount.CURRENCY_RE), quote, string)
+    return re.sub(r'\b({})\b'.format(amount.CURRENCY_RE), quote_match, string)
 
 
 def postings_by_type(entry):
@@ -210,3 +217,26 @@ def filter_rounding_postings(entry, dformat):
             new_postings.append(posting)
     entry = entry._replace(postings=new_postings)
     return entry
+
+
+def map_data(string, config):
+    """
+    Map accounts and curencies according to user-defined mappings.
+    """
+
+    account_map = config.get("account_map", {})
+    currency_map = config.get("currency_map", {})
+
+    if not account_map and not currency_map:
+        return string
+
+    for account in account_map:
+         string = re.sub(rf'\b{account}(?=  |\t|$)', account_map[account], string)
+
+    def map_currency(match):
+        currency = match.group(2)
+        return quote(currency_map.get(currency, currency))
+
+    string = re.sub(rf'(?<=\d\s)(")?({amount.CURRENCY_RE})\1?', map_currency, string)
+
+    return string

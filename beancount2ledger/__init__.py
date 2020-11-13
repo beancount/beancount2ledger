@@ -14,6 +14,7 @@ from beancount.core.data import filter_txns
 from pkg_resources import DistributionNotFound
 from pkg_resources import get_distribution
 
+from .common import map_data
 from .ledger import LedgerPrinter
 from .hledger import HLedgerPrinter
 
@@ -43,7 +44,7 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
         printer = HLedgerPrinter(dcontext=dcontext, config=config)
     else:
         printer = LedgerPrinter(dcontext=dcontext, config=config)
-    return '\n'.join(printer(entry) for entry in entries)
+    return '\n'.join(map_data(printer(entry), config) for entry in entries)
 
 
 def convert_file(file, output_format="ledger", dcontext=None, config={}):
