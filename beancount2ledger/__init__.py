@@ -38,7 +38,7 @@ def convert(entries, output_format="ledger", dcontext=None, config={}):
                 if (
                     posting.meta
                     and "__automatic__" in posting.meta
-                    and not "__residual__" in posting.meta
+                    and "__residual__" not in posting.meta
                 ):
                     continue
                 dcontext.update(posting.units.number, posting.units.currency)
