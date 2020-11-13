@@ -11,7 +11,17 @@ This includes:
 
 ## Unsupported features in ledger
 
+### Flags
+
+Beancount supports a wide range of flags whereas ledger only allows `*` and `!`.  Flags which are not supported in ledger are therefore removed.
+
+### Directives
+
 Beancount has a number of directives which have no equivalence in ledger.  This includes directives such as `event` and `close`.
 
 Since equivalent directives don't exist, these directives are converted to comments in the ledger output.
+
+### Inline math
+
+Inline math is evaluated and the calculated amount is written to the ledger file rather than the original inline math.
 
