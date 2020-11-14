@@ -45,7 +45,7 @@ class LedgerPrinter:
 
 
     def format_meta(self, key, val):
-        """"
+        """
         Format metadata
         """
 

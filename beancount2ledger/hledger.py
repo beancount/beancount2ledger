@@ -26,7 +26,7 @@ class HLedgerPrinter(LedgerPrinter):
     "Multi-method for printing directives in HLedger format."
 
     def format_meta(self, key, val):
-        """"
+        """
         Format metadata
         """
 
