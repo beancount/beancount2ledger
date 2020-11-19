@@ -1,38 +1,38 @@
 spellchecker: aspell
 
 matrix:
-- name: markdown
-  sources:
-    - "**/*.md"
-  pipeline:
-    - pyspelling.filters.markdown:
-      markdown_extensions:
-        - markdown.extensions.extra:
-    - pyspelling.filters.html:
-        comments: true
-        ignores:
-          - code
-          - pre
-    - pyspelling.filters.url:
-  dictionary:
-    wordlists:
-    - .aspell.en.pws
-- name: scd
-  sources:
-    - "**/*.scd"
-  pipeline:
-    - pyspelling.filters.text:
-    - pyspelling.filters.url:
-  dictionary:
-    wordlists:
-    - .aspell.en.pws
-- name: Python
-  sources:
-    - "beancount2ledger/*.py"
-  pipeline:
-    - pyspelling.filters.python:
-    - pyspelling.filters.url:
-  dictionary:
-    wordlists:
-    - .aspell.en.pws
-    - .words-python.txt
+  - name: markdown
+    sources:
+      - "**/*.md"
+    pipeline:
+      - pyspelling.filters.markdown:
+        markdown_extensions:
+          - markdown.extensions.extra:
+      - pyspelling.filters.html:
+          comments: true
+          ignores:
+            - code
+            - pre
+      - pyspelling.filters.url:
+    dictionary:
+      wordlists:
+        - .aspell.en.pws
+  - name: scd
+    sources:
+      - "**/*.scd"
+    pipeline:
+      - pyspelling.filters.text:
+      - pyspelling.filters.url:
+    dictionary:
+      wordlists:
+        - .aspell.en.pws
+  - name: Python
+    sources:
+      - "beancount2ledger/*.py"
+    pipeline:
+      - pyspelling.filters.python:
+      - pyspelling.filters.url:
+    dictionary:
+      wordlists:
+        - .aspell.en.pws
+        - .words-python.txt

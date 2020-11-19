@@ -1,4 +1,3 @@
-
 # The number of spaces to indent postings
 indent: 2
 
@@ -7,4 +6,3 @@ auxdate: aux-date
 
 # A metadata key that specifies metadata that should become the date of a posting (date in hledger).
 postdate: date
-
