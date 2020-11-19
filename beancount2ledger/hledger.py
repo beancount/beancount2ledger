@@ -106,7 +106,7 @@ class HLedgerPrinter(LedgerPrinter):
         # We don't use position.to_string() because that uses the same
         # dformat for amount and cost, but we want dformat from our
         # dcontext to format amounts to the right precision while
-        # retaining the full rpecision for costs.
+        # retaining the full precision for costs.
         if isinstance(posting.units, Amount):
             pos_str = posting.units.to_string(self.dformat)
         # Convert the cost as a price entry, that's what HLedger appears to want.

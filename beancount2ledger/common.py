@@ -224,7 +224,7 @@ def filter_rounding_postings(entry, dformat):
 
 def map_data(string, config):
     """
-    Map accounts and curencies according to user-defined mappings.
+    Map accounts and currencies according to user-defined mappings.
     """
 
     account_map = config.get("account_map", {})
