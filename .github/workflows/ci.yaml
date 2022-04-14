@@ -30,6 +30,7 @@ jobs:
         run: brew install ledger
       - run: pip install -r requirements.txt -r requirements_dev.txt
       - run: python -m pytest
+      - run: pip install "black>=22.3.0"
       - run: black --check .
       - run: flake8 .
   docs:
