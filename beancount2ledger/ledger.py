@@ -296,7 +296,7 @@ class LedgerPrinter:
         )
 
     def Event(self, entry):
-        """ Event entries"""
+        """Event entries"""
 
         self.io.write(
             ';; Event: {e.date:%Y-%m-%d} "{e.type}" "{e.description}"\n'.format(e=entry)
