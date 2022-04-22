@@ -9,6 +9,7 @@ Convert Beancount entries to hledger
 __license__ = "GPL-2.0-or-later"
 
 import datetime
+import re
 
 from beancount.core.amount import Amount
 from beancount.core import position
@@ -17,7 +18,7 @@ from beancount.core import display_context
 
 from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, user_meta
-from .common import get_lineno, filter_rounding_postings
+from .common import gen_bal_assignment, get_lineno, filter_rounding_postings
 from .ledger import LedgerPrinter
 
 
@@ -34,6 +35,18 @@ class HLedgerPrinter(LedgerPrinter):
         return f"{key}: {val}"
 
     def Transaction(self, entry):
+        indent = " " * self.config["indent"]
+
+        if entry.flag == "P":
+            match = re.match(
+                r"\(Padding inserted for Balance of (.+) for difference",
+                entry.narration,
+            )
+            if match:
+                string = gen_bal_assignment(entry, match.group(1), indent)
+                self.io.write(string)
+                return
+
         # Insert a posting to absorb the residual if necessary. This is
         # sometimes needed because Ledger bases its balancing precision on the
         # *last* number of digits used on that currency. This is believed to be
@@ -69,8 +82,6 @@ class HLedgerPrinter(LedgerPrinter):
         if payee:
             self.io.write(" " + payee)
         self.io.write("\n")
-
-        indent = " " * self.config["indent"]
 
         if entry.tags:
             self.io.write(indent + "; {}:\n".format(":, ".join(sorted(entry.tags))))

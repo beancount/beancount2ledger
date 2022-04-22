@@ -11,6 +11,7 @@ __license__ = "GPL-2.0-or-later"
 
 import datetime
 import io
+import re
 
 from beancount.core.amount import Amount
 from beancount.core.inventory import Inventory
@@ -24,6 +25,7 @@ from .common import ROUNDING_ACCOUNT
 from .common import ledger_flag, ledger_str, quote_currency, postings_by_type, user_meta
 from .common import (
     set_default,
+    gen_bal_assignment,
     get_lineno,
     is_automatic_posting,
     filter_rounding_postings,
@@ -80,6 +82,18 @@ class LedgerPrinter:
     def Transaction(self, entry):
         """Transactions"""
 
+        indent = " " * self.config["indent"]
+
+        if entry.flag == "P":
+            match = re.match(
+                r"\(Padding inserted for Balance of (.+) for difference",
+                entry.narration,
+            )
+            if match:
+                string = gen_bal_assignment(entry, match.group(1), indent)
+                self.io.write(string)
+                return
+
         # Insert a posting to absorb the residual if necessary. This is
         # sometimes needed because Ledger bases its balancing precision on the
         # *last* number of digits used on that currency. This is believed to be
@@ -115,8 +129,6 @@ class LedgerPrinter:
         if payee:
             self.io.write(" " + payee)
         self.io.write("\n")
-
-        indent = " " * self.config["indent"]
 
         if entry.tags:
             self.io.write(indent + "; :{}:\n".format(":".join(sorted(entry.tags))))
@@ -255,11 +267,8 @@ class LedgerPrinter:
 
         # Note: We don't need to output these because when we're loading the
         # Beancount file explicit padding entries will be generated
-        # automatically, thus balancing the accounts. Ledger does not support
-        # automatically padding, so we can just output this as a comment.
-        self.io.write(
-            ";; Pad: {e.date:%Y-%m-%d} {e.account} {e.source_account}\n".format(e=entry)
-        )
+        # automatically.  We special-case these automatically padding
+        # entries to generate a ledger balance assignment.
 
     def Commodity(self, entry):
         "Commodity declarations" ""

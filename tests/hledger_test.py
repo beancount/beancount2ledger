@@ -654,6 +654,38 @@ class TestHLedgerConversion(test_utils.TestCase):
             result,
         )
 
+    @loader.load_doc()
+    def test_pad(self, entries, _, ___):
+        """
+        2022-01-01 open Assets:US:Chase:Checking
+        2022-01-01 open Equity:Opening-Balances
+
+        2022-01-01 * "Set opening balance"
+          Assets:US:Chase:Checking    400.00 USD
+          Equity:Opening-Balances    -400.00 USD
+
+        2022-03-01 pad Assets:US:Chase:Checking Equity:Opening-Balances
+        2022-04-07 balance Assets:US:Chase:Checking 1000.00 USD
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(
+            r"""
+            account Assets:US:Chase:Checking
+
+            account Equity:Opening-Balances
+
+            2022-01-01 * Set opening balance
+              Assets:US:Chase:Checking                                       400.00 USD
+              Equity:Opening-Balances                                       -400.00 USD
+
+
+            2022-03-01 Setting account Assets:US:Chase:Checking to 1000.00 USD
+              Assets:US:Chase:Checking                                    = 1000.00 USD
+              Equity:Opening-Balances
+        """,
+            result,
+        )
+
     def test_example(self):
         """
         Test converted example with hledger

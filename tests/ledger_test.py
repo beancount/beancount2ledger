@@ -341,19 +341,6 @@ class TestLedgerConversion(test_utils.TestCase):
         )
 
     @loader.load_doc()
-    def test_metadata_none(self, entries, _, ___):
-        """
-        2000-01-01 open Assets:Test1
-        2000-01-01 open Assets:Test2
-
-        2019-01-21 pad Assets:Test1 Assets:Test2
-        2019-01-22 balance Assets:Test1   10.00 GBP
-        """
-        # padding (P) entries don't set entry.meta or posting.meta, so
-        # convert to make sure we don't crash.
-        _ = beancount2ledger.convert(entries)
-
-    @loader.load_doc()
     def test_cost_info(self, entries, _, ___):
         """
         2020-01-01 open Expenses:Computers
@@ -981,6 +968,38 @@ class TestLedgerConversion(test_utils.TestCase):
               Assets:Test                                       -1000.00 EUREUREUREUREUR
               Assets:Test                                                    1000.00 EUR
               Assets:Test                                                   -1000.00 EUR
+        """,
+            result,
+        )
+
+    @loader.load_doc()
+    def test_pad(self, entries, _, ___):
+        """
+        2022-01-01 open Assets:US:Chase:Checking
+        2022-01-01 open Equity:Opening-Balances
+
+        2022-01-01 * "Set opening balance"
+          Assets:US:Chase:Checking    400.00 USD
+          Equity:Opening-Balances    -400.00 USD
+
+        2022-03-01 pad Assets:US:Chase:Checking Equity:Opening-Balances
+        2022-04-07 balance Assets:US:Chase:Checking 1000.00 USD
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(
+            r"""
+            account Assets:US:Chase:Checking
+
+            account Equity:Opening-Balances
+
+            2022-01-01 * Set opening balance
+              Assets:US:Chase:Checking                                       400.00 USD
+              Equity:Opening-Balances                                       -400.00 USD
+
+
+            2022-03-01 Setting account Assets:US:Chase:Checking to 1000.00 USD
+              Assets:US:Chase:Checking                                    = 1000.00 USD
+              Equity:Opening-Balances
         """,
             result,
         )

@@ -243,3 +243,19 @@ def map_data(string, config):
     string = re.sub(rf'(?<=\d\s)(")?({amount.CURRENCY_RE})\1?', map_currency, string)
 
     return string
+
+
+def gen_bal_assignment(entry, amt, indent):
+    """
+    Generate a balance assignment
+    """
+
+    string = f"{entry.date:%Y-%m-%d}"
+    src_acct = entry.postings[0].account
+    string += f" Setting account {src_acct} to {amt}\n"
+    amt = f"= {amt}"
+    len_amt = max(0, 25 - len(indent))
+    string += f"{indent}{src_acct:50}{amt:>{len_amt}}\n"
+    dest_acct = entry.postings[1].account
+    string += f"{indent}{dest_acct}"
+    return string
