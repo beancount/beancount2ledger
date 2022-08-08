@@ -28,6 +28,12 @@ postdate
 code
 :   A metadata key that specifies metadata that should become the code of a transaction.
 
+### Information to metadata
+
+payee-meta
+
+:   A metadata key that specifies where to store the payee of a transaction, instead of using the `payee | narration` syntax (which is the default).
+
 ### Mappings
 
 account_map
