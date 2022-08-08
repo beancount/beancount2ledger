@@ -466,6 +466,48 @@ class TestLedgerConversion(test_utils.TestCase):
         )
 
     @loader.load_doc()
+    def test_payee_meta(self, entries, _, ___):
+        # clean slate, with default config that use "payee | narration" syntax
+        """
+        2020-01-01 open Expenses:Computers
+        2020-01-01 open Assets:Bank
+
+        2020-02-03 * "Super Shop"  "New computer"
+          Expenses:Computers       1100.00 USD
+          Assets:Bank
+        """
+        result = beancount2ledger.convert(entries)
+        self.assertLines(
+            """
+          account Expenses:Computers
+
+          account Assets:Bank
+
+          2020-02-03 * Super Shop | New computer
+            Expenses:Computers       1100.00 USD
+            Assets:Bank
+        """,  # NoQA: E501 line too long
+            result,
+        )
+
+        # use payee-meta to request moving payee to transaction metadata
+        config = {"payee-meta": "x-payee"}
+        result = beancount2ledger.convert(entries, config=config)
+        self.assertLines(
+            """
+          account Expenses:Computers
+
+          account Assets:Bank
+
+          2020-02-03 * New computer
+            ; x-payee: Super Shop
+            Expenses:Computers       1100.00 USD
+            Assets:Bank
+        """,  # NoQA: E501 line too long
+            result,
+        )
+
+    @loader.load_doc()
     def test_flags(self, entries, _, ___):
         """
         2010-01-01 open Assets:Test

@@ -109,11 +109,13 @@ For ledger output, metadata types other than strings will be converted to [typed
 
 ## Payee and narration
 
-Unlike beancount, ledger does not differentiate between payee and narration.  Therefore, the following syntax is used for ledger's payee field:
+Unlike beancount, ledger does not differentiate between payee and narration.  Therefore, the following syntax is used for ledger's payee field by default:
 
 ```
 payee | narration
 ```
+
+Alternatively, you can use the `payee-meta` config variable to store the payee in a custom metadata key.
 
 This is also the syntax used by hledger (where narration is called a [note](https://hledger.org/journal.html#payee-and-note)).
 

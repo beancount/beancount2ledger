@@ -104,14 +104,19 @@ class LedgerPrinter:
         # rounding amounts to 0.00)
         entry = filter_rounding_postings(entry, self.dformat)
 
+        meta = user_meta(entry.meta or {})
+
         # Compute the string for the payee and narration line.
         strings = []
         if entry.payee:
-            strings.append(f"{ledger_str(entry.payee)} |")
+            payee_meta = self.config.get("payee-meta")
+            if payee_meta:
+                meta[payee_meta] = entry.payee
+            else:
+                strings.append(f"{ledger_str(entry.payee)} |")
         if entry.narration:
             strings.append(ledger_str(entry.narration))
 
-        meta = user_meta(entry.meta or {})
         self.io.write(f"{entry.date:%Y-%m-%d}")
         auxdate_key = self.config.get("auxdate")
         if auxdate_key and isinstance(meta.get(auxdate_key), datetime.date):
