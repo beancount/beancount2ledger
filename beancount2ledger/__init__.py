@@ -11,16 +11,15 @@ __license__ = "GPL-2.0-or-later"
 from beancount import loader
 from beancount.core import display_context
 from beancount.core.data import filter_txns
-from pkg_resources import DistributionNotFound
-from pkg_resources import get_distribution
+from importlib.metadata import version, PackageNotFoundError
 
 from .common import map_data
 from .ledger import LedgerPrinter
 from .hledger import HLedgerPrinter
 
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     __version__ = "undistributed"
 
 
