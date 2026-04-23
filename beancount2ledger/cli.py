@@ -11,7 +11,6 @@ __license__ = "GPL-2.0-or-later"
 
 import argparse
 import contextlib
-import locale
 from pathlib import Path
 import os
 import sys
@@ -19,6 +18,12 @@ from tempfile import NamedTemporaryFile
 import yaml
 
 import beancount2ledger
+
+
+# Beancount has limited Unicode support, UTF8 is the richest encoding supported (and not
+# everywhere)
+# Cf.: # https://beancount.github.io/docs/a_comparison_of_beancount_and_ledger_hledger.html#limited-support-for-unicode # # NoQA
+BEANCOUNT_ENCODING = "utf8"
 
 
 def get_config(user_config):
@@ -81,7 +86,7 @@ def cli():
                 NamedTemporaryFile(
                     prefix="tmp.beancount2ledger.",
                     mode="w",
-                    encoding=locale.getpreferredencoding(),
+                    encoding=BEANCOUNT_ENCODING,
                 )
             )
             tmpfile.write(sys.stdin.read())
